@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Other collections rules could go here
+    
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /products/{productId} {
+      // Cualquiera puede leer productos, incluso no autenticados (opcional si es marketplace público)
+      allow read: if true;
+      
+      // Solo usuarios logueados pueden crear, y su sellerId debe coincidir con su auth.uid
+      allow create: if request.auth != null && request.resource.data.sellerId == request.auth.uid;
+      
+      // Solo el dueño (seller) puede editar o eliminar su producto
+      allow update, delete: if request.auth != null && resource.data.sellerId == request.auth.uid;
+    }
+  }
+}
