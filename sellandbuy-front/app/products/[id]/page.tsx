@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { getProductById } from '../../../services/product.service';
 import { Product } from '../../../types/product';
 import { Loader2, MapPin, Package, Heart, Share2, ShieldCheck, MessageCircle } from 'lucide-react';
+import { ContactSellerButton } from '../../../components/chat/ContactSellerButton';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -115,10 +116,7 @@ export default function ProductDetailPage() {
                </div>
             </div>
 
-            <button className="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-neutral-900/20 flex items-center justify-center gap-2">
-              <MessageCircle size={20} />
-              Contactar Vendedor
-            </button>
+            <ContactSellerButton productId={product.id} sellerId={product.sellerId} />
           </div>
 
           <div className="bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm">

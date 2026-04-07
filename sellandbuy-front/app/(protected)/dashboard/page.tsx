@@ -91,6 +91,9 @@ export default function DashboardPage() {
 
         {/* Navigation */}
         <div style={styles.navSection}>
+          <Link href="/messages" style={styles.navBtn}>
+            📬 Mis Mensajes
+          </Link>
           <Link href="/products" style={styles.navBtn}>
             🛒 Ver Productos
           </Link>

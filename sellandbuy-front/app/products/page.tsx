@@ -4,7 +4,7 @@ import { getProducts } from '@/services/product.service';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Product } from '@/types/product';
 import Link from 'next/link';
-import { Loader2, Plus, Filter, AlertTriangle } from 'lucide-react';
+import { Loader2, Plus, Filter, AlertTriangle, MessageSquare } from 'lucide-react';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,6 +40,10 @@ export default function ProductsPage() {
             <p className="text-neutral-500 mt-1">Encuentra exactamente lo que estás buscando</p>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
+            <Link href="/messages" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-full font-semibold hover:bg-neutral-100 transition-colors shadow-sm">
+              <MessageSquare size={18} />
+              Mensajes
+            </Link>
             <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-full font-semibold hover:bg-neutral-100 transition-colors shadow-sm">
               <Filter size={18} />
               Filtros
