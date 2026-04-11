@@ -12,6 +12,7 @@ export interface Conversation {
   productImage?: string;
   otherUserName?: string;
   otherUserPhoto?: string;
+  unreadCount?: Record<string, number>;
 }
 
 export interface Message {

@@ -3,8 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getProductById } from '../../../services/product.service';
 import { Product } from '../../../types/product';
-import { Loader2, MapPin, Package, Heart, Share2, ShieldCheck, MessageCircle } from 'lucide-react';
+import { Loader2, MapPin, Package, Heart, Share2, ShieldCheck, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { ContactSellerButton } from '../../../components/chat/ContactSellerButton';
+import { useAuth } from '../../../hooks/useAuth';
+import { useProductActions } from '../../../hooks/useProducts';
+import { useRouter } from 'next/navigation';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -13,6 +16,10 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
+
+  const { firebaseUser } = useAuth();
+  const { editProduct } = useProductActions();
+  const router = useRouter();
 
   useEffect(() => {
     async function loadProduct() {
@@ -53,6 +60,18 @@ export default function ProductDetailPage() {
     currency: product.currency,
     maximumFractionDigits: 0
   }).format(product.price);
+
+  const isOwner = firebaseUser?.uid === product.sellerId;
+
+  const handleDelete = async () => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este producto permanentemente de la vista pública?')) return;
+    const success = await editProduct(product.id, { status: 'deleted' });
+    if (success) {
+      router.push('/products');
+    } else {
+      alert("Error al eliminar el producto");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50 py-8 px-4">
@@ -116,7 +135,24 @@ export default function ProductDetailPage() {
                </div>
             </div>
 
-            <ContactSellerButton productId={product.id} sellerId={product.sellerId} />
+            {isOwner ? (
+               <div className="flex gap-4">
+                 <button 
+                   onClick={() => router.push(`/products/edit/${product.id}`)}
+                   className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-amber-500/20"
+                 >
+                   <Edit size={20} /> Editar
+                 </button>
+                 <button 
+                   onClick={handleDelete}
+                   className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-6 rounded-xl transition-colors border border-red-200"
+                 >
+                   <Trash2 size={20} />
+                 </button>
+               </div>
+            ) : (
+              <ContactSellerButton productId={product.id} sellerId={product.sellerId} />
+            )}
           </div>
 
           <div className="bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm">

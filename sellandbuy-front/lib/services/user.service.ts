@@ -97,7 +97,7 @@ export async function getUserProfile(
  */
 export async function updateUserProfile(
   uid: string,
-  data: Partial<Pick<UserProfile, "displayName" | "photoURL">>
+  data: Partial<Pick<UserProfile, "displayName" | "photoURL" | "bio">>
 ): Promise<UserProfile> {
   const userRef = doc(db, "users", uid);
 

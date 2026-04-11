@@ -137,16 +137,23 @@ interface FetchProductsResult {
  * List active products with optional filters, optimized for Firestore (no joins).
  */
 export async function getProducts(
-  constraints: { category?: string; status?: "active" | "sold" | "paused"; limitNumber?: number } = {},
+  constraints: { category?: string; status?: string; sellerId?: string; limitNumber?: number } = {},
   lastDocSnap?: DocumentSnapshot
 ): Promise<FetchProductsResult> {
   try {
     const queries: QueryConstraint[] = [];
     
+    if (constraints.sellerId) {
+      queries.push(where("sellerId", "==", constraints.sellerId));
+    }
+
     if (constraints.status) {
       queries.push(where("status", "==", constraints.status));
-    } else {
+    } else if (!constraints.sellerId) {
       queries.push(where("status", "==", "active"));
+    } else {
+      // Si buscamos por seller sin estado específico, ignorar los borrados
+      queries.push(where("status", "in", ["active", "sold", "paused"]));
     }
 
     if (constraints.category) {

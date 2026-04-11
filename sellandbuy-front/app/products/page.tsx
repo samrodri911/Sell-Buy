@@ -10,11 +10,14 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<string>('');
 
   useEffect(() => {
     async function loadProducts() {
+      setLoading(true);
+      setError(null);
       try {
-        const result = await getProducts();
+        const result = await getProducts(category ? { category } : {});
         setProducts(result.products);
       } catch (err: any) {
         console.error(err);
@@ -29,7 +32,7 @@ export default function ProductsPage() {
       }
     }
     loadProducts();
-  }, []);
+  }, [category]);
 
   return (
     <div className="min-h-screen bg-neutral-50 px-4 py-8">
@@ -44,10 +47,19 @@ export default function ProductsPage() {
               <MessageSquare size={18} />
               Mensajes
             </Link>
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-full font-semibold hover:bg-neutral-100 transition-colors shadow-sm">
-              <Filter size={18} />
-              Filtros
-            </button>
+            <select 
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="flex-1 md:flex-none bg-white border border-neutral-200 text-neutral-700 px-4 py-3 rounded-full font-semibold hover:bg-neutral-50 transition-colors shadow-sm outline-none appearance-none"
+            >
+              <option value="">Todas las categorías</option>
+              <option value="Electronics">Electrónica</option>
+              <option value="Vehicles">Vehículos</option>
+              <option value="Real Estate">Inmuebles</option>
+              <option value="Home">Hogar</option>
+              <option value="Fashion">Moda</option>
+              <option value="Other">Otros</option>
+            </select>
             <Link href="/products/create" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-neutral-900 text-white px-6 py-3 rounded-full font-bold hover:bg-neutral-800 transition-colors shadow-lg shadow-neutral-900/20">
               <Plus size={20} />
               Publicar

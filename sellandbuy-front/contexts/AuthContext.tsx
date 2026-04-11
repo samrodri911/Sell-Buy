@@ -70,11 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       await signInWithPopup(auth, googleProvider);
       // onAuthStateChanged will handle the rest
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === "auth/popup-closed-by-user") {
+        setLoading(false);
+        return;
+      }
       console.error("[Auth] Google login error:", err);
-      setError(
-        err instanceof Error ? err.message : "Error al iniciar sesión con Google"
-      );
+      const message = getAuthErrorMessage(err);
+      setError(message);
       setLoading(false);
     }
   }, []);
@@ -87,10 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         await signInWithEmailAndPassword(auth, email, password);
         // onAuthStateChanged will handle the rest
-      } catch (err) {
+      } catch (err: any) {
         console.error("[Auth] Email login error:", err);
         const message = getAuthErrorMessage(err);
-        setError(message);
+        if (message) setError(message);
         setLoading(false);
       }
     },
@@ -115,10 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = await getUserProfile(result.user.uid, true);
         setUserProfile(profile);
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("[Auth] Signup error:", err);
         const message = getAuthErrorMessage(err);
-        setError(message);
+        if (message) setError(message);
         setLoading(false);
       }
     },
@@ -203,7 +206,7 @@ function getAuthErrorMessage(err: unknown): string {
       case "auth/too-many-requests":
         return "Demasiados intentos. Espera un momento e intenta de nuevo.";
       case "auth/popup-closed-by-user":
-        return "Se cerró la ventana de inicio de sesión.";
+        return "";
       default:
         return `Error de autenticación (${code}).`;
     }

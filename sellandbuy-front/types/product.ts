@@ -1,5 +1,5 @@
 export type ProductCondition = "new" | "used";
-export type ProductStatus = "active" | "sold" | "paused";
+export type ProductStatus = "active" | "sold" | "paused" | "deleted";
 
 export interface Location {
   city: string;

@@ -6,14 +6,18 @@ import { Conversation } from "@/types/chat";
 import { formatDistanceToNowStrict } from "date-fns";
 import { es } from "date-fns/locale";
 import { useConversations } from "@/hooks/useConversations";
+import { useAuth } from "@/hooks/useAuth";
+import { markConversationAsRead } from "@/services/chat.service";
 import { Loader2, MessageSquare, AlertCircle } from "lucide-react";
 
 export function ConversationList() {
   const { conversations, loading, error } = useConversations();
+  const { firebaseUser } = useAuth();
   const pathname = usePathname();
 
   // Extract ID from /messages/[id]
   const currentConversationId = pathname?.split('/').pop();
+  const currentUserId = firebaseUser?.uid || "";
 
   if (loading) {
     return (
@@ -60,11 +64,18 @@ export function ConversationList() {
           const timeAgo = conv.updatedAt?.toDate 
             ? formatDistanceToNowStrict(conv.updatedAt.toDate(), { locale: es, addSuffix: true })
             : '';
+            
+          const unreads = conv.unreadCount?.[currentUserId] || 0;
 
           return (
             <Link 
               key={conv.id} 
               href={`/messages/${conv.id}`}
+              onClick={() => {
+                if (unreads > 0) {
+                  markConversationAsRead(conv.id, currentUserId);
+                }
+              }}
               className={`block hover:bg-neutral-50/80 transition-colors ${isActive ? 'bg-indigo-50/50 hover:bg-indigo-50/80' : ''}`}
             >
               <div className="p-4 flex gap-4 items-center">
@@ -110,9 +121,16 @@ export function ConversationList() {
                       {conv.productTitle}
                     </p>
                   </div>
-                  <p className={`text-sm mt-1 truncate ${isActive ? 'text-neutral-800' : 'text-neutral-500'}`}>
-                    {conv.lastMessage || <span className="italic text-neutral-400">Nuevo chat...</span>}
-                  </p>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className={`text-sm truncate ${isActive ? 'text-neutral-800' : 'text-neutral-500'} ${unreads > 0 ? 'font-bold text-neutral-900' : ''}`}>
+                      {conv.lastMessage || <span className="italic text-neutral-400">Nuevo chat...</span>}
+                    </p>
+                    {unreads > 0 && !isActive && (
+                      <span className="bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                        {unreads}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Link>

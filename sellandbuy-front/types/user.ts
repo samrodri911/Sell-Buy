@@ -14,6 +14,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   photoURL: string;
+  bio?: string;
   role: UserRole;
   isVerified: boolean;
   reputation: number;
@@ -24,7 +25,7 @@ export interface UserProfile {
 // Fields that the client is allowed to write on create/update
 export type UserWritableFields = Pick<
   UserProfile,
-  "displayName" | "photoURL" | "email"
+  "displayName" | "photoURL" | "email" | "bio"
 >;
 
 // ─── Auth Context State ────────────────────────────────────────

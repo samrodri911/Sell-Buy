@@ -2,28 +2,77 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useProductActions } from '../../hooks/useProducts';
-import { CreateProductInput, ProductCondition } from '../../types/product';
-import { UploadCloud, X, Loader2, AlertCircle } from 'lucide-react';
+import { useAIGenerator } from '../../hooks/useAIGenerator';
+import { CreateProductInput, ProductCondition, Product, ProductStatus } from '../../types/product';
+import { UploadCloud, X, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export function ProductForm() {
+interface ProductFormProps {
+  product?: Product;
+}
+
+export function ProductForm({ product }: ProductFormProps) {
   const { firebaseUser, loading: authLoading } = useAuth();
-  const { createNewProduct, loading, error } = useProductActions();
+  const { createNewProduct, editProduct, loading, error } = useProductActions();
   const router = useRouter();
+  const { generateProductData, isGenerating, error: aiError } = useAIGenerator();
 
   const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(product?.images || []);
+  const [suggestedPrice, setSuggestedPrice] = useState<{rango: string; justificacion: string} | null>(null);
   
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    currency: 'COP',
-    category: 'Electronics',
-    condition: 'new' as ProductCondition,
-    city: '',
-    country: 'Colombia'
+    title: product?.title || '',
+    description: product?.description || '',
+    price: product?.price.toString() || '',
+    currency: product?.currency || 'COP',
+    category: product?.category || 'Electronics',
+    condition: product?.condition || 'new' as ProductCondition,
+    status: product?.status || 'active' as ProductStatus,
+    city: product?.location?.city || '',
+    country: product?.location?.country || 'Colombia',
+    tags: product?.tags || [] as string[]
   });
+
+  const handleAIGenerate = async () => {
+    if (!formData.title) {
+      alert("Por favor, ingresa al menos un título o descripción breve para que la IA tenga contexto.");
+      return;
+    }
+    
+    const aiData = await generateProductData({
+      nombre: formData.title,
+      estado: formData.condition,
+    });
+
+    if (aiData) {
+      if (aiData.precio_estimado) {
+        setSuggestedPrice({
+          rango: aiData.precio_estimado.rango,
+          justificacion: aiData.precio_estimado.justificacion
+        });
+      }
+
+      setFormData(prev => {
+        let newPrice = prev.price;
+        if ((!prev.price || prev.price === '0') && aiData.precio_estimado?.minimo_numerico) {
+          newPrice = aiData.precio_estimado.minimo_numerico.toString();
+        }
+
+        return {
+          ...prev,
+          title: aiData.titulo || prev.title,
+          description: aiData.descripcion || prev.description,
+          price: newPrice,
+          category: aiData.categoria || prev.category,
+          condition: (aiData.atributos?.condicion === "used" || aiData.atributos?.condicion === "new") 
+                       ? (aiData.atributos.condicion as ProductCondition) 
+                       : prev.condition,
+          tags: aiData.palabras_clave && aiData.palabras_clave.length > 0 ? aiData.palabras_clave : prev.tags
+        };
+      });
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,16 +84,29 @@ export function ProductForm() {
   };
 
   const addFiles = (newFiles: File[]) => {
+    // Validate type and size
+    const validFiles = newFiles.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        alert(`El archivo ${file.name} no es una imagen válida.`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`La imagen ${file.name} excede el límite de 5MB.`);
+        return false;
+      }
+      return true;
+    });
+
     // Limit to 5 images max
-    if (images.length + newFiles.length > 5) {
+    if (images.length + validFiles.length > 5) {
       alert("Puedes subir un máximo de 5 imágenes.");
       return;
     }
     
-    setImages(prev => [...prev, ...newFiles]);
+    setImages(prev => [...prev, ...validFiles]);
     
     // Create previews
-    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
@@ -61,6 +123,25 @@ export function ProductForm() {
     e.preventDefault();
     if (!firebaseUser) return;
     
+    if (product) {
+      // Edit mode (text & status only for now)
+      const success = await editProduct(product.id, {
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        currency: formData.currency,
+        category: formData.category,
+        condition: formData.condition,
+        status: formData.status,
+        location: { city: formData.city, country: formData.country },
+        tags: formData.tags
+      });
+      if (success) {
+        router.push(`/products/${product.id}`);
+      }
+      return;
+    }
+
     if (images.length === 0) {
       alert("Por favor añade al menos 1 imagen");
       return;
@@ -77,7 +158,7 @@ export function ProductForm() {
         city: formData.city,
         country: formData.country,
       },
-      tags: [], // Implementation of tags could be added later
+      tags: formData.tags, 
       images: images, 
     };
 
@@ -99,17 +180,17 @@ export function ProductForm() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl mx-auto bg-white shadow-xl rounded-3xl overflow-hidden border border-neutral-100">
       <div className="bg-neutral-900 p-8 text-white">
-        <h2 className="text-3xl font-black mb-2 tracking-tight">Publicar Producto</h2>
-        <p className="text-neutral-400">Detalla lo que vas a vender para atraer más compradores.</p>
+        <h2 className="text-3xl font-black mb-2 tracking-tight">{product ? 'Editar Producto' : 'Publicar Producto'}</h2>
+        <p className="text-neutral-400">{product ? 'Actualiza los datos de tu anuncio.' : 'Detalla lo que vas a vender para atraer más compradores.'}</p>
       </div>
 
       <div className="p-8 space-y-8">
         
         {/* Error State */}
-        {error && (
+        {(error || aiError) && (
           <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-3 border border-red-100">
             <AlertCircle size={20} />
-            <span className="font-medium">{error}</span>
+            <span className="font-medium">{error || aiError}</span>
           </div>
         )}
 
@@ -134,12 +215,13 @@ export function ProductForm() {
             />
           </div>
 
-          {/* Previews */}
-          {imagePreviews.length > 0 && (
-            <div className="flex gap-4 overflow-x-auto py-2">
-              {imagePreviews.map((preview, idx) => (
-                <div key={idx} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm group">
-                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+        {/* Previews */}
+        {imagePreviews.length > 0 && (
+          <div className="flex gap-4 overflow-x-auto py-2">
+            {imagePreviews.map((preview, idx) => (
+              <div key={idx} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm group">
+                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                {!product && (
                   <button 
                     type="button" 
                     onClick={() => removeImage(idx)}
@@ -147,14 +229,33 @@ export function ProductForm() {
                   >
                     <X size={14} />
                   </button>
-                </div>
-              ))}
-            </div>
-          )}
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         </div>
 
         {/* Section: Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+            <div>
+              <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+                <Sparkles size={18} className="text-indigo-600" />
+                Asistente de IA
+              </h3>
+              <p className="text-sm text-indigo-700 mt-1">Escribe un título breve y presiona el botón para completar el resto del formulario automáticamente.</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAIGenerate}
+              disabled={isGenerating || !formData.title}
+              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+              Completar con IA
+            </button>
+          </div>
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-semibold text-neutral-700">Título del Anuncio</label>
             <input 
@@ -182,6 +283,16 @@ export function ProductForm() {
                 onChange={e => setFormData({...formData, price: e.target.value})}
               />
             </div>
+            {suggestedPrice && (
+              <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm">
+                <p className="font-bold text-amber-800 flex items-center gap-1">
+                  💡 Precio sugerido: <span className="font-mono bg-white px-2 py-0.5 rounded shadow-sm text-neutral-800">{suggestedPrice.rango} COP</span>
+                </p>
+                <p className="text-amber-700/80 mt-1 text-xs leading-relaxed">
+                  {suggestedPrice.justificacion}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -226,6 +337,21 @@ export function ProductForm() {
             </div>
           </div>
           
+          {product && (
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-neutral-700">Estado del Anuncio</label>
+              <select 
+                className="w-full p-3 bg-amber-50 text-amber-900 border border-amber-200 font-bold rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
+                value={formData.status}
+                onChange={e => setFormData({...formData, status: e.target.value as ProductStatus})}
+              >
+                <option value="active">Activo (Visible para todos)</option>
+                <option value="paused">Pausado (Oculto temporalmente)</option>
+                <option value="sold">Vendido</option>
+              </select>
+            </div>
+          )}
+
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-semibold text-neutral-700">Ciudad</label>
             <input 
@@ -249,6 +375,22 @@ export function ProductForm() {
               onChange={e => setFormData({...formData, description: e.target.value})}
             />
           </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-semibold text-neutral-700">Etiquetas (Palabras clave)</label>
+            <div className="flex flex-wrap gap-2 p-3 bg-neutral-50 border border-neutral-200 rounded-xl min-h-[50px] items-center">
+              {formData.tags.length > 0 ? (
+                formData.tags.map((tag, idx) => (
+                  <span key={idx} className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    {tag}
+                    <button type="button" onClick={() => setFormData(prev => ({...prev, tags: prev.tags.filter((_, i) => i !== idx)}))} className="hover:text-indigo-900"><X size={12} /></button>
+                  </span>
+                ))
+              ) : (
+                <span className="text-neutral-400 text-sm">Sin etiquetas aún. La IA las generará por ti.</span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Action Button */}
@@ -261,10 +403,10 @@ export function ProductForm() {
             {loading ? (
               <>
                  <Loader2 size={24} className="animate-spin" />
-                 Publicando Producto...
+                 {product ? 'Guardando...' : 'Publicando Producto...'}
               </>
             ) : (
-               'Publicar Producto'
+               product ? 'Guardar Cambios' : 'Publicar Producto'
             )}
            
           </button>

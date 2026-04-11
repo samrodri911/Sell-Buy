@@ -13,7 +13,8 @@ import {
   serverTimestamp,
   onSnapshot,
   Timestamp,
-  Unsubscribe
+  Unsubscribe,
+  increment
 } from "firebase/firestore";
 import { Conversation, Message } from "@/types/chat";
 import { getProductById } from "./product.service";
@@ -53,6 +54,10 @@ export async function createOrGetConversation(
     productId,
     participants: [buyerId, sellerId],
     lastMessage: "",
+    unreadCount: {
+      [buyerId]: 0,
+      [sellerId]: 0
+    },
     createdAt: now,
     updatedAt: now
   });
@@ -71,6 +76,13 @@ export async function sendMessage(
   const messagesRef = collection(db, `${CONVERSATIONS_COLLECTION}/${conversationId}/messages`);
   const now = serverTimestamp();
   
+  const conversationRef = doc(db, CONVERSATIONS_COLLECTION, conversationId);
+  const conversationSnap = await getDoc(conversationRef);
+  if (!conversationSnap.exists()) return;
+  
+  const data = conversationSnap.data();
+  const receiverId = data.participants.find((id: string) => id !== senderId);
+
   // 1. Add message
   await addDoc(messagesRef, {
     text: trimmedText,
@@ -79,10 +91,24 @@ export async function sendMessage(
   });
 
   // 2. Update conversation
-  const conversationRef = doc(db, CONVERSATIONS_COLLECTION, conversationId);
-  await updateDoc(conversationRef, {
+  const updates: any = {
     lastMessage: trimmedText,
     updatedAt: now
+  };
+  if (receiverId) {
+    updates[`unreadCount.${receiverId}`] = increment(1);
+  }
+  
+  await updateDoc(conversationRef, updates);
+}
+
+export async function markConversationAsRead(
+  conversationId: string,
+  userId: string
+): Promise<void> {
+  const conversationRef = doc(db, CONVERSATIONS_COLLECTION, conversationId);
+  await updateDoc(conversationRef, {
+    [`unreadCount.${userId}`]: 0
   });
 }
 
@@ -119,13 +145,16 @@ export function subscribeToUserConversations(
   );
 
   return onSnapshot(q, async (snapshot) => {
-    const promises = snapshot.docs.map(async (connDoc) => {
+    const promises = snapshot.docs
+      .filter(doc => doc.data().lastMessage !== "")
+      .map(async (connDoc) => {
       const data = connDoc.data();
       const conversation = {
         id: connDoc.id,
         productId: data.productId,
         participants: data.participants,
         lastMessage: data.lastMessage,
+        unreadCount: data.unreadCount,
         createdAt: data.createdAt || Timestamp.now(),
         updatedAt: data.updatedAt || Timestamp.now(),
       } as Conversation;
