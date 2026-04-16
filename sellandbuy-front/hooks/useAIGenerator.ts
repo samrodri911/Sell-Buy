@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { AI_ENABLED } from "@/lib/constants/ai";
 
 export interface AIProductData {
   titulo: string;
@@ -16,6 +17,9 @@ export interface AIProductData {
     condicion?: string;
     [key: string]: any;
   };
+  confidencia?: "alta" | "baja";
+  preguntas_dinamicas?: string[];
+  error?: string; // Para identificar fallbacks como AI_UNAVAILABLE
 }
 
 export function useAIGenerator() {
@@ -23,8 +27,15 @@ export function useAIGenerator() {
   const [error, setError] = useState<string | null>(null);
 
   const generateProductData = useCallback(async (
-    params: { nombre: string; estado?: string; color?: string; targetAudience?: string }
+    params: { nombre?: string; estado?: string; color?: string; targetAudience?: string; imageUrl?: string }
   ): Promise<AIProductData | null> => {
+    
+    // Si la IA está deshabilitada a nivel global, abortamos instantáneamente
+    if (!AI_ENABLED) {
+      setError("AI_UNAVAILABLE");
+      return null;
+    }
+
     setIsGenerating(true);
     setError(null);
     try {
@@ -46,6 +57,12 @@ export function useAIGenerator() {
       }
 
       const data: AIProductData = await res.json();
+      
+      if (data.error === "AI_UNAVAILABLE") {
+        setError("AI_UNAVAILABLE");
+        return null;
+      }
+      
       return data;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error desconocido");

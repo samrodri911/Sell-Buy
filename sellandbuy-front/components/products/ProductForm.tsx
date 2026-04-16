@@ -2,7 +2,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useProductActions } from '../../hooks/useProducts';
-import { useAIGenerator } from '../../hooks/useAIGenerator';
+import { AIProductData } from '../../hooks/useAIGenerator';
+import { AIHelperModal } from '../features/ai/AIHelperModal';
+import { AISuggestionBox } from '../features/ai/AISuggestionBox';
 import { CreateProductInput, ProductCondition, Product, ProductStatus } from '../../types/product';
 import { UploadCloud, X, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -15,11 +17,13 @@ export function ProductForm({ product }: ProductFormProps) {
   const { firebaseUser, loading: authLoading } = useAuth();
   const { createNewProduct, editProduct, loading, error } = useProductActions();
   const router = useRouter();
-  const { generateProductData, isGenerating, error: aiError } = useAIGenerator();
 
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>(product?.images || []);
-  const [suggestedPrice, setSuggestedPrice] = useState<{rango: string; justificacion: string} | null>(null);
+  
+  // States AI
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<AIProductData | null>(null);
   
   const [formData, setFormData] = useState({
     title: product?.title || '',
@@ -27,50 +31,19 @@ export function ProductForm({ product }: ProductFormProps) {
     price: product?.price.toString() || '',
     currency: product?.currency || 'COP',
     category: product?.category || 'Electronics',
-    condition: product?.condition || 'new' as ProductCondition,
+    condition: product?.condition || 'used' as ProductCondition,
     status: product?.status || 'active' as ProductStatus,
     city: product?.location?.city || '',
     country: product?.location?.country || 'Colombia',
     tags: product?.tags || [] as string[]
   });
 
-  const handleAIGenerate = async () => {
-    if (!formData.title) {
-      alert("Por favor, ingresa al menos un título o descripción breve para que la IA tenga contexto.");
-      return;
-    }
-    
-    const aiData = await generateProductData({
-      nombre: formData.title,
-      estado: formData.condition,
-    });
+  const handleAIAuccess = (aiData: AIProductData) => {
+    setAiSuggestions(aiData);
 
-    if (aiData) {
-      if (aiData.precio_estimado) {
-        setSuggestedPrice({
-          rango: aiData.precio_estimado.rango,
-          justificacion: aiData.precio_estimado.justificacion
-        });
-      }
-
-      setFormData(prev => {
-        let newPrice = prev.price;
-        if ((!prev.price || prev.price === '0') && aiData.precio_estimado?.minimo_numerico) {
-          newPrice = aiData.precio_estimado.minimo_numerico.toString();
-        }
-
-        return {
-          ...prev,
-          title: aiData.titulo || prev.title,
-          description: aiData.descripcion || prev.description,
-          price: newPrice,
-          category: aiData.categoria || prev.category,
-          condition: (aiData.atributos?.condicion === "used" || aiData.atributos?.condicion === "new") 
-                       ? (aiData.atributos.condicion as ProductCondition) 
-                       : prev.condition,
-          tags: aiData.palabras_clave && aiData.palabras_clave.length > 0 ? aiData.palabras_clave : prev.tags
-        };
-      });
+    // Autollenado sutil de precio si está vacío
+    if (aiData.precio_estimado && (!formData.price || formData.price === '0' || formData.price === '')) {
+      setFormData(prev => ({ ...prev, price: aiData.precio_estimado!.minimo_numerico.toString() }));
     }
   };
 
@@ -187,10 +160,10 @@ export function ProductForm({ product }: ProductFormProps) {
       <div className="p-8 space-y-8">
         
         {/* Error State */}
-        {(error || aiError) && (
+        {error && (
           <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-3 border border-red-100">
             <AlertCircle size={20} />
-            <span className="font-medium">{error || aiError}</span>
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
@@ -242,20 +215,89 @@ export function ProductForm({ product }: ProductFormProps) {
             <div>
               <h3 className="font-bold text-indigo-900 flex items-center gap-2">
                 <Sparkles size={18} className="text-indigo-600" />
-                Asistente de IA
+                Asistente de IA (Beta)
               </h3>
-              <p className="text-sm text-indigo-700 mt-1">Escribe un título breve y presiona el botón para completar el resto del formulario automáticamente.</p>
+              <p className="text-sm text-indigo-700 mt-1">Completa los datos usando descripciones o fotos de tu producto.</p>
             </div>
             <button
               type="button"
-              onClick={handleAIGenerate}
-              disabled={isGenerating || !formData.title}
-              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              onClick={() => setIsAIModalOpen(true)}
+              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm"
             >
-              {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-              Completar con IA
+              <Sparkles size={16} /> Completar con IA
             </button>
           </div>
+
+          {/* AI Suggestions Review Panel */}
+          {aiSuggestions && (
+            <div className="md:col-span-2 bg-indigo-50/50 border border-indigo-200 rounded-xl p-4 animate-slide-up shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+                    <Sparkles size={18} className="text-indigo-600" />
+                    Sugerencias de IA Listas
+                  </h3>
+                  <p className="text-sm text-indigo-700 mt-1">Revisa y selecciona qué datos deseas aplicar a tu anuncio.</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setAiSuggestions(null)}
+                  className="text-neutral-400 hover:text-neutral-700 p-1 bg-white rounded-full shadow-sm"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Título</span>
+                    <p className="text-sm font-medium text-neutral-800 line-clamp-1">{aiSuggestions.titulo}</p>
+                  </div>
+                  <button type="button" onClick={() => setFormData(p => ({...p, title: aiSuggestions.titulo}))} className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-md font-bold hover:bg-indigo-200 whitespace-nowrap">Utilizar Título</button>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                  <div className="flex-1">
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Descripción y Ajustes</span>
+                    <p className="text-sm text-neutral-600 line-clamp-1">{aiSuggestions.descripcion}</p>
+                  </div>
+                  <button type="button" onClick={() => setFormData(p => ({
+                      ...p, 
+                      description: aiSuggestions.descripcion, 
+                      category: aiSuggestions.categoria, 
+                      condition: (aiSuggestions.atributos?.condicion === "used" || aiSuggestions.atributos?.condicion === "new") ? aiSuggestions.atributos.condicion as ProductCondition : p.condition,
+                      tags: aiSuggestions.palabras_clave && aiSuggestions.palabras_clave.length > 0 ? aiSuggestions.palabras_clave : p.tags
+                    }))} 
+                    className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-md font-bold hover:bg-indigo-200 whitespace-nowrap">
+                    Aplicar Texto y Detalles
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-indigo-200/50 flex justify-end">
+                 <button 
+                  type="button" 
+                  onClick={() => {
+                    setFormData(p => ({
+                      ...p,
+                      title: aiSuggestions.titulo,
+                      price: aiSuggestions.precio_estimado?.minimo_numerico?.toString() || p.price,
+                      description: aiSuggestions.descripcion,
+                      category: aiSuggestions.categoria,
+                      condition: (aiSuggestions.atributos?.condicion === "used" || aiSuggestions.atributos?.condicion === "new") ? aiSuggestions.atributos.condicion as ProductCondition : p.condition,
+                      tags: aiSuggestions.palabras_clave && aiSuggestions.palabras_clave.length > 0 ? aiSuggestions.palabras_clave : p.tags
+                    }));
+                    setAiSuggestions(null);
+                  }}
+                  className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition shadow-sm"
+                >
+                  Aplicar Todo y Ocultar
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-semibold text-neutral-700">Título del Anuncio</label>
             <input 
@@ -283,15 +325,11 @@ export function ProductForm({ product }: ProductFormProps) {
                 onChange={e => setFormData({...formData, price: e.target.value})}
               />
             </div>
-            {suggestedPrice && (
-              <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm">
-                <p className="font-bold text-amber-800 flex items-center gap-1">
-                  💡 Precio sugerido: <span className="font-mono bg-white px-2 py-0.5 rounded shadow-sm text-neutral-800">{suggestedPrice.rango} COP</span>
-                </p>
-                <p className="text-amber-700/80 mt-1 text-xs leading-relaxed">
-                  {suggestedPrice.justificacion}
-                </p>
-              </div>
+            {aiSuggestions?.precio_estimado && (
+              <AISuggestionBox 
+                rango={aiSuggestions.precio_estimado.rango} 
+                justificacion={aiSuggestions.precio_estimado.justificacion} 
+              />
             )}
           </div>
 
@@ -413,6 +451,12 @@ export function ProductForm({ product }: ProductFormProps) {
         </div>
 
       </div>
+
+      <AIHelperModal 
+        isOpen={isAIModalOpen} 
+        onClose={() => setIsAIModalOpen(false)} 
+        onSuccess={handleAIAuccess} 
+      />
     </form>
   );
 }
