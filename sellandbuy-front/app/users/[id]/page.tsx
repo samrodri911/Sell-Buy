@@ -7,7 +7,7 @@ import { getProducts } from '@/services/product.service';
 import { UserProfile } from '@/types/user';
 import { Product } from '@/types/product';
 import { ProductCard } from '@/components/products/ProductCard';
-import { Loader2, Edit3, X, Check, PackageOpen } from 'lucide-react';
+import { Loader2, Edit3, X, Check, PackageOpen, Star, MapPin } from 'lucide-react';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -119,25 +119,31 @@ export default function UserProfilePage() {
               </div>
             ) : (
               <>
-                <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
-                  {profile.displayName}
-                  {isOwner && (
-                    <button onClick={() => setIsEditing(true)} className="text-neutral-400 hover:text-indigo-600 transition-colors bg-neutral-100 p-2 rounded-full">
-                       <Edit3 size={16} />
-                    </button>
-                  )}
-                </h1>
-                <p className="text-neutral-500 mt-2 max-w-2xl whitespace-pre-wrap leading-relaxed">
+                <div className="flex flex-col items-center sm:items-start flex-1 gap-2">
+                  <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
+                    {profile.displayName}
+                    {isOwner && (
+                      <button onClick={() => setIsEditing(true)} className="text-neutral-400 hover:text-indigo-600 transition-colors bg-neutral-100 p-2 rounded-full">
+                         <Edit3 size={16} />
+                      </button>
+                    )}
+                  </h1>
+                  
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-medium text-neutral-500">
+                     <div className="flex items-center gap-1.5 text-amber-500">
+                        <Star fill="currentColor" size={16} />
+                        <span className="font-bold text-amber-600">{profile.sellerRating ? profile.sellerRating.toFixed(1) : 'Nuevo'}</span>
+                        <span className="text-neutral-400">({profile.sellerRatingCount || 0} reseñas)</span>
+                     </div>
+                     <div className="flex items-center gap-1.5">
+                       <MapPin size={16} /> 
+                       Miembro desde {profile.createdAt?.toDate?.()?.getFullYear?.() || new Date().getFullYear()}
+                     </div>
+                  </div>
+                </div>
+                <p className="text-neutral-500 mt-4 max-w-2xl whitespace-pre-wrap leading-relaxed">
                   {profile.bio || "Este usuario aún no tiene una biografía."}
                 </p>
-                <div className="mt-4 flex gap-4 text-sm font-semibold">
-                   <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">
-                      Vendedor Verificado
-                   </div>
-                   <div className="bg-neutral-100 text-neutral-600 px-3 py-1 rounded-full">
-                      Se unió en {profile.createdAt?.toDate?.()?.getFullYear?.() || new Date().getFullYear()}
-                   </div>
-                </div>
               </>
             )}
           </div>

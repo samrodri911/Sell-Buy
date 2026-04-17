@@ -93,6 +93,9 @@ export async function createProduct(
       status: "active",
       views: 0,
       likes: 0,
+      rating: 0,
+      ratingCount: 0,
+      quantity: data.quantity ?? 1,
       createdAt: now,
       updatedAt: now,
     };
@@ -186,16 +189,46 @@ export async function getProducts(
   }
 }
 
-/**
- * Updates an existing product
- */
-export async function updateProduct(productId: string, data: UpdateProductInput): Promise<void> {
+export async function updateProduct(productId: string, data: UpdateProductInput, sellerId?: string): Promise<void> {
   try {
     const docRef = doc(db, COLLECTION_NAME, productId);
-    await updateDoc(docRef, {
-      ...data,
-      updatedAt: Timestamp.now()
-    });
+    
+    // Handle image deletion from storage
+    if (data.imagesToDelete && data.imagesToDelete.length > 0) {
+      const deletePromises = data.imagesToDelete.map(async (url) => {
+        try {
+          const fileRef = ref(storage, url);
+          await deleteObject(fileRef);
+        } catch (e) {
+          console.warn("Could not delete image from storage:", url, e);
+        }
+      });
+      await Promise.all(deletePromises);
+    }
+
+    // Handle new images upload
+    let newUrls: string[] = [];
+    if (data.newImages && data.newImages.length > 0 && sellerId) {
+      newUrls = await uploadMediaFiles(data.newImages, sellerId, productId);
+    }
+
+    // Prepare final payload
+    const finalUpdate: any = { ...data, updatedAt: Timestamp.now() };
+    delete finalUpdate.imagesToDelete;
+    delete finalUpdate.newImages;
+
+    if (newUrls.length > 0) {
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const currentImages = docSnap.data().images || [];
+        // Extract surviving existing images (excluding imagesToDelete if the UI didn't already exclude them from the update payload)
+        // Actually, the UI should send the updated `images` string array in `data.images`.
+        // We just append newUrls to `data.images`
+        finalUpdate.images = [...(data.images || currentImages), ...newUrls];
+      }
+    }
+
+    await updateDoc(docRef, finalUpdate);
   } catch (error) {
     console.error("Error updating product:", error);
     throw new Error("Failed to update product");

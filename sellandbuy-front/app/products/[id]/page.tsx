@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getProductById } from '../../../services/product.service';
 import { Product } from '../../../types/product';
-import { Loader2, MapPin, Package, Heart, Share2, ShieldCheck, MessageCircle, Edit, Trash2 } from 'lucide-react';
+import { Loader2, MapPin, Package, Heart, Share2, ShieldCheck, MessageCircle, Edit, Trash2, Star } from 'lucide-react';
 import { ContactSellerButton } from '../../../components/chat/ContactSellerButton';
+import { ProductComments } from '../../../components/products/ProductComments';
 import { useAuth } from '../../../hooks/useAuth';
 import { useProductActions } from '../../../hooks/useProducts';
 import { useRouter } from 'next/navigation';
@@ -12,7 +13,7 @@ import { useRouter } from 'next/navigation';
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
@@ -76,22 +77,22 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-neutral-50 py-8 px-4">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* Gallery Section */}
         <div className="lg:col-span-7 flex flex-col gap-4">
           {/* Main Image */}
           <div className="bg-white rounded-3xl overflow-hidden aspect-square border border-neutral-100 flex items-center justify-center p-4">
-             {activeImage ? (
-                <img src={activeImage} alt={product.title} className="w-full h-full object-contain rounded-2xl" />
-             ) : (
-                <div className="text-neutral-400">Sin imagen</div>
-             )}
+            {activeImage ? (
+              <img src={activeImage} alt={product.title} className="w-full h-full object-contain rounded-2xl" />
+            ) : (
+              <div className="text-neutral-400">Sin imagen</div>
+            )}
           </div>
           {/* Thumbnails */}
           {product.images.length > 1 && (
             <div className="flex gap-4 overflow-x-auto pb-2">
               {product.images.map((img, idx) => (
-                <button 
+                <button
                   key={idx}
                   onClick={() => setActiveImage(img)}
                   className={`w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === img ? 'border-amber-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
@@ -119,68 +120,87 @@ export default function ProductDetailPage() {
             <h1 className="text-3xl font-black text-neutral-900 leading-tight mb-2">
               {product.title}
             </h1>
-            
-            <div className="text-4xl font-black text-neutral-900 mb-6 tracking-tight">
+
+            <div className="text-4xl font-black text-neutral-900 mb-4 tracking-tight">
               {formattedPrice}
             </div>
 
+            {product.ratingCount > 0 && (
+              <div className="flex items-center gap-2 mb-6 text-neutral-600">
+                <div className="flex gap-1 text-amber-500">
+                  <Star fill="currentColor" size={20} />
+                </div>
+                <span className="font-bold text-neutral-900 text-lg">{product.rating.toFixed(1)}</span>
+                <span className="text-sm">({product.ratingCount} reseñas)</span>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4 mb-8">
-               <div className="flex items-center gap-2 text-sm text-neutral-600 bg-neutral-50 p-3 rounded-2xl">
-                 <MapPin size={18} className="text-amber-500" />
-                 <span>{product.location?.city}, {product.location?.country}</span>
-               </div>
-               <div className="flex items-center gap-2 text-sm text-neutral-600 bg-neutral-50 p-3 rounded-2xl">
-                 <Package size={18} className="text-amber-500" />
-                 <span className="capitalize">{product.condition === 'new' ? 'Nuevo' : 'Usado'}</span>
-               </div>
+              <div className="flex items-center gap-2 text-sm text-neutral-600 bg-neutral-50 p-3 rounded-2xl">
+                <MapPin size={18} className="text-amber-500" />
+                <span>{product.location?.city}, {product.location?.country}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-neutral-600 bg-neutral-50 p-3 rounded-2xl">
+                <Package size={18} className="text-amber-500" />
+                <span className="capitalize">{product.condition === 'new' ? 'Nuevo' : 'Usado'}</span>
+              </div>
+              {(product.quantity ?? 1) >= 0 && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600 bg-neutral-50 p-3 rounded-2xl col-span-2">
+                  <Package size={18} className="text-amber-500" />
+                  <span className="font-bold">{product.quantity} disponibles</span>
+                </div>
+              )}
             </div>
 
             {isOwner ? (
-               <div className="flex gap-4">
-                 <button 
-                   onClick={() => router.push(`/products/edit/${product.id}`)}
-                   className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-amber-500/20"
-                 >
-                   <Edit size={20} /> Editar
-                 </button>
-                 <button 
-                   onClick={handleDelete}
-                   className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-6 rounded-xl transition-colors border border-red-200"
-                 >
-                   <Trash2 size={20} />
-                 </button>
-               </div>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => router.push(`/products/edit/${product.id}`)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-amber-500/20"
+                >
+                  <Edit size={20} /> Editar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-6 rounded-xl transition-colors border border-red-200"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
             ) : (
               <ContactSellerButton productId={product.id} sellerId={product.sellerId} />
             )}
           </div>
 
           <div className="bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm">
-             <h3 className="text-lg font-bold text-neutral-900 mb-4 border-b pb-4">Descripción</h3>
-             <div className="text-neutral-600 whitespace-pre-wrap leading-relaxed mix-blend-multiply">
-               {product.description}
-             </div>
+            <h3 className="text-lg font-bold text-neutral-900 mb-4 border-b pb-4">Descripción</h3>
+            <div className="text-neutral-600 whitespace-pre-wrap leading-relaxed mix-blend-multiply">
+              {product.description}
+            </div>
           </div>
-          
+
           <div className="bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm">
-             <h3 className="text-lg font-bold text-neutral-900 mb-4">Información del vendedor</h3>
-             <div className="flex items-center gap-4">
-                {product.sellerPhoto ? (
-                  <img src={product.sellerPhoto} alt={product.sellerName} className="w-14 h-14 rounded-full object-cover" />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xl font-bold">
-                    {product.sellerName?.charAt(0) || '?'}
-                  </div>
-                )}
-                <div>
-                  <div className="font-bold text-neutral-900 text-lg flex items-center gap-1">
-                    {product.sellerName}
-                    <ShieldCheck size={16} className="text-blue-500 mt-0.5" />
-                  </div>
-                  <div className="text-sm text-neutral-500">Miembro verificado</div>
+            <h3 className="text-lg font-bold text-neutral-900 mb-4">Información del vendedor</h3>
+            <div className="flex items-center gap-4">
+              {product.sellerPhoto ? (
+                <img src={product.sellerPhoto} alt={product.sellerName} className="w-14 h-14 rounded-full object-cover" />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xl font-bold">
+                  {product.sellerName?.charAt(0) || '?'}
                 </div>
-             </div>
+              )}
+              <div>
+                <div className="font-bold text-neutral-900 text-lg flex items-center gap-1">
+                  {product.sellerName}
+                  <ShieldCheck size={16} className="text-blue-500 mt-0.5" />
+                </div>
+                <div className="text-sm text-neutral-500">Miembro verificado</div>
+              </div>
+            </div>
           </div>
+
+          {/* Comentarios embebidos */}
+          <ProductComments productId={product.id} sellerId={product.sellerId} />
 
         </div>
       </div>

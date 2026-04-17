@@ -25,11 +25,11 @@ export function useProductActions() {
     }
   };
 
-  const editProduct = async (productId: string, data: UpdateProductInput): Promise<boolean> => {
+  const editProduct = async (productId: string, data: UpdateProductInput, sellerId?: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
-      await updateProductService(productId, data);
+      await updateProductService(productId, data, sellerId);
       setLoading(false);
       return true;
     } catch (err: any) {

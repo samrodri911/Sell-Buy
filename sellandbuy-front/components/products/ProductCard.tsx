@@ -43,6 +43,11 @@ export function ProductCard({ product }: ProductCardProps) {
                   {product.status}
                 </span>
              )}
+             {(product.quantity ?? 1) > 0 && (
+                <span className="px-2.5 py-1 text-[10px] font-bold bg-amber-100 text-amber-800 rounded-full shadow-sm">
+                  {product.quantity === 1 ? 'Última unidad' : `${product.quantity} disp.`}
+                </span>
+             )}
           </div>
           <button className="p-2 rounded-full bg-white/50 backdrop-blur-md hover:bg-white text-neutral-600 hover:text-red-500 transition-colors shadow-sm">
             <Heart size={18} />

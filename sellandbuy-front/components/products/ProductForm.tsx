@@ -18,8 +18,10 @@ export function ProductForm({ product }: ProductFormProps) {
   const { createNewProduct, editProduct, loading, error } = useProductActions();
   const router = useRouter();
 
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>(product?.images || []);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(product?.images || []);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
   
   // States AI
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -35,7 +37,8 @@ export function ProductForm({ product }: ProductFormProps) {
     status: product?.status || 'active' as ProductStatus,
     city: product?.location?.city || '',
     country: product?.location?.country || 'Colombia',
-    tags: product?.tags || [] as string[]
+    tags: product?.tags || [] as string[],
+    quantity: product?.quantity ?? 1
   });
 
   const handleAIAuccess = (aiData: AIProductData) => {
@@ -71,22 +74,27 @@ export function ProductForm({ product }: ProductFormProps) {
     });
 
     // Limit to 5 images max
-    if (images.length + validFiles.length > 5) {
-      alert("Puedes subir un máximo de 5 imágenes.");
+    if (existingImages.length + newImages.length + validFiles.length > 5) {
+      alert("Puedes subir un máximo de 5 imágenes en total.");
       return;
     }
     
-    setImages(prev => [...prev, ...validFiles]);
+    setNewImages(prev => [...prev, ...validFiles]);
     
     // Create previews
     const newPreviews = validFiles.map(file => URL.createObjectURL(file));
-    setImagePreviews(prev => [...prev, ...newPreviews]);
+    setNewImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => {
-      // Revoke URL to avoid memory leaks
+  const removeExistingImage = (index: number) => {
+    const urlToRemove = existingImages[index];
+    setImagesToDelete(prev => [...prev, urlToRemove]);
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index));
+    setNewImagePreviews(prev => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
@@ -97,7 +105,12 @@ export function ProductForm({ product }: ProductFormProps) {
     if (!firebaseUser) return;
     
     if (product) {
-      // Edit mode (text & status only for now)
+      if (existingImages.length === 0 && newImages.length === 0) {
+        alert("Por favor añade al menos 1 imagen");
+        return;
+      }
+      
+      // Edit mode
       const success = await editProduct(product.id, {
         title: formData.title,
         description: formData.description,
@@ -106,16 +119,20 @@ export function ProductForm({ product }: ProductFormProps) {
         category: formData.category,
         condition: formData.condition,
         status: formData.status,
+        quantity: Number(formData.quantity),
         location: { city: formData.city, country: formData.country },
-        tags: formData.tags
-      });
+        tags: formData.tags,
+        images: existingImages, // Lo que sobrevivió
+        imagesToDelete: imagesToDelete,
+        newImages: newImages
+      }, firebaseUser.uid);
       if (success) {
         router.push(`/products/${product.id}`);
       }
       return;
     }
 
-    if (images.length === 0) {
+    if (newImages.length === 0) {
       alert("Por favor añade al menos 1 imagen");
       return;
     }
@@ -127,12 +144,13 @@ export function ProductForm({ product }: ProductFormProps) {
       currency: formData.currency,
       category: formData.category,
       condition: formData.condition,
+      quantity: Number(formData.quantity),
       location: {
         city: formData.city,
         country: formData.country,
       },
       tags: formData.tags, 
-      images: images, 
+      images: newImages, 
     };
 
     const newProduct = await createNewProduct(payload, firebaseUser.uid, firebaseUser.displayName || 'Seller', firebaseUser.photoURL);
@@ -189,20 +207,35 @@ export function ProductForm({ product }: ProductFormProps) {
           </div>
 
         {/* Previews */}
-        {imagePreviews.length > 0 && (
+        {(existingImages.length > 0 || newImagePreviews.length > 0) && (
           <div className="flex gap-4 overflow-x-auto py-2">
-            {imagePreviews.map((preview, idx) => (
-              <div key={idx} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm group">
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                {!product && (
-                  <button 
-                    type="button" 
-                    onClick={() => removeImage(idx)}
-                    className="absolute top-1 right-1 bg-red-500/90 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
+            
+            {/* Existing Images */}
+            {existingImages.map((url, idx) => (
+              <div key={`exist-${idx}`} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm group border border-neutral-200">
+                <img src={url} alt="Existing" className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => removeExistingImage(idx)}
+                  className="absolute top-1 right-1 bg-red-500/90 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+
+            {/* New Images */}
+            {newImagePreviews.map((preview, idx) => (
+              <div key={`new-${idx}`} className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm group border-2 border-indigo-200">
+                <img src={preview} alt="New Preview" className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => removeNewImage(idx)}
+                  className="absolute top-1 right-1 bg-red-500/90 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                >
+                  <X size={14} />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-indigo-500 text-white text-[9px] text-center font-bold">NUEVA</div>
               </div>
             ))}
           </div>
@@ -373,6 +406,19 @@ export function ProductForm({ product }: ProductFormProps) {
                 Usado
               </label>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-neutral-700">Cantidad (Stock)</label>
+            <input 
+              type="number" 
+              required 
+              min="1"
+              className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
+              placeholder="1"
+              value={formData.quantity}
+              onChange={e => setFormData({...formData, quantity: Number(e.target.value) || 1 })}
+            />
           </div>
           
           {product && (

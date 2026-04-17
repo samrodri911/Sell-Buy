@@ -18,6 +18,10 @@ export interface UserProfile {
   role: UserRole;
   isVerified: boolean;
   reputation: number;
+  sellerRating: number;
+  sellerRatingCount: number;
+  buyerRating: number;
+  buyerRatingCount: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
