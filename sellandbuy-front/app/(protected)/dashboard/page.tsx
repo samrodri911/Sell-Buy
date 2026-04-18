@@ -2,13 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getProducts } from "@/services/product.service";
 import { Product } from "@/types/product";
-import { Loader2, Package, CheckCircle, TrendingUp, Star, Edit, Plus, PauseCircle, PlayCircle, Eye } from "lucide-react";
+import { Loader2, PauseCircle, PlayCircle } from "lucide-react";
 import { useProductActions } from "@/hooks/useProducts";
+import { Navbar } from "@/components/ui/Navbar";
+import { BottomNav } from "@/components/ui/BottomNav";
 
+// ─── All original business logic is unchanged ────────────────────
 export default function DashboardPage() {
   const { firebaseUser, userProfile, loading: authLoading, logout } = useAuth();
   const { editProduct } = useProductActions();
@@ -17,7 +21,6 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !firebaseUser) {
       router.replace("/");
@@ -28,12 +31,16 @@ export default function DashboardPage() {
     if (firebaseUser) {
       loadMyProducts();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser]);
 
   const loadMyProducts = async () => {
     setLoading(true);
     try {
-      const { products: fetched } = await getProducts({ sellerId: firebaseUser!.uid, limitNumber: 100 });
+      const { products: fetched } = await getProducts({
+        sellerId: firebaseUser!.uid,
+        limitNumber: 100,
+      });
       setProducts(fetched);
     } catch (e) {
       console.error(e);
@@ -42,180 +49,285 @@ export default function DashboardPage() {
     }
   };
 
-  const activeProducts = products.filter(p => p.status === 'active').length;
-  const soldProducts = products.filter(p => p.status === 'sold').length;
-  const estimatedRevenue = products.filter(p => p.status === 'sold').reduce((acc, p) => acc + p.price, 0);
+  const activeProducts = products.filter((p) => p.status === "active").length;
+  const soldProducts   = products.filter((p) => p.status === "sold").length;
+  const estimatedRevenue = products
+    .filter((p) => p.status === "sold")
+    .reduce((acc, p) => acc + p.price, 0);
 
   const toggleStatus = async (product: Product) => {
-    const newStatus = product.status === 'active' ? 'paused' : 'active';
+    const newStatus = product.status === "active" ? "paused" : "active";
     const success = await editProduct(product.id, { status: newStatus });
     if (success) {
-      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, status: newStatus } : p));
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p))
+      );
     }
   };
-
-  if (authLoading || (!firebaseUser && !authLoading)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <Loader2 size={48} className="animate-spin text-amber-500" />
-      </div>
-    );
-  }
 
   const handleLogout = async () => {
     await logout();
     router.replace("/");
   };
+  // ── End original logic ────────────────────────────────────────
+
+  if (authLoading || (!firebaseUser && !authLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[--color-surface]">
+        <Loader2 size={40} className="animate-spin text-[--color-primary]" />
+      </div>
+    );
+  }
+
+  const revenueFormatted = new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(estimatedRevenue);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[--color-surface] pb-32">
+      <Navbar activeTab="profile" />
 
-        {/* Header Profile */}
-        <div className="bg-white rounded-3xl p-8 border border-neutral-100 flex flex-col md:flex-row items-center justify-between shadow-sm gap-6">
-          <div className="flex items-center gap-6">
-            {userProfile?.photoURL ? (
-              <img src={userProfile.photoURL} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-4 border-amber-100" />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-3xl font-black">
-                {userProfile?.displayName?.charAt(0) || '?'}
-              </div>
-            )}
-            <div>
-              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
-                Hola, {userProfile?.displayName}
-              </h1>
-              <p className="text-neutral-500">{userProfile?.email}</p>
+      <main className="max-w-screen-xl mx-auto px-6 pt-8 pb-8 space-y-10">
 
-              <div className="mt-2 flex gap-4 text-sm font-semibold text-neutral-600">
-                <span className="flex items-center gap-1 text-amber-500">
-                  <Star fill="currentColor" size={16} />
-                  {userProfile?.sellerRating ? userProfile.sellerRating.toFixed(1) : 'Nuevo'}
-                </span>
-                <span>{userProfile?.sellerRatingCount || 0} reseñas</span>
-              </div>
-            </div>
+        {/* ── Dashboard Header ── */}
+        <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-[--color-primary] font-semibold tracking-wider text-xs uppercase">
+              Mi Tienda
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight text-[--color-on-surface] mt-1">
+              Hola, {userProfile?.displayName?.split(" ")[0]} 👋
+            </h1>
           </div>
-
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link href={`/users/${userProfile?.uid}`} className="flex-1 md:flex-none text-center bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold py-3 px-6 rounded-xl transition-colors">
-              Ver perfil público
+          <div className="flex gap-3">
+            <Link
+              href={`/users/${userProfile?.uid}`}
+              className="px-5 py-2.5 bg-[--color-surface-container-high] text-[--color-on-secondary-container] rounded-xl font-medium transition-all hover:bg-[--color-surface-container-highest] flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-sm">person</span>
+              Ver perfil
             </Link>
-            <button onClick={handleLogout} className="flex-1 md:flex-none text-center bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 px-6 rounded-xl transition-colors border border-red-100">
-              Cerrar Sesión
+            <Link
+              href="/products/create"
+              className="px-5 py-2.5 bg-[--color-primary] text-[--color-on-primary] rounded-xl font-medium transition-all hover:opacity-90 flex items-center gap-2 shadow-lg shadow-[--color-primary]/20"
+            >
+              <span className="material-symbols-outlined text-sm">add_circle</span>
+              Nuevo anuncio
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-5 py-2.5 bg-[--color-error-container] text-[--color-on-error-container] rounded-xl font-medium transition-all hover:opacity-90 flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-sm">logout</span>
+              Salir
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-600/20 relative overflow-hidden">
-            <div className="relative z-10">
-              <span className="text-indigo-200 font-semibold mb-1 block tracking-wide">ACTIVOS</span>
-              <div className="text-4xl font-black">{activeProducts}</div>
+        {/* ── Metrics Bento Grid ── */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* Active Products */}
+          <div className="bg-[--color-surface-container-lowest] p-8 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[--color-primary-fixed]/30 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <p className="text-[--color-on-surface-variant] font-medium text-sm">Publicaciones activas</p>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-[--color-on-surface]">{activeProducts}</span>
+              <span className="text-emerald-600 text-sm font-bold">productos</span>
             </div>
-            <Package size={80} className="absolute -bottom-4 -right-4 text-white opacity-10" />
+            <div className="mt-6 w-full h-1 bg-[--color-surface-container] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[--color-primary] rounded-full transition-all duration-700"
+                style={{ width: products.length ? `${(activeProducts / products.length) * 100}%` : "0%" }}
+              />
+            </div>
           </div>
 
-          <div className="bg-emerald-500 rounded-3xl p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
-            <div className="relative z-10">
-              <span className="text-emerald-100 font-semibold mb-1 block tracking-wide">VENDIDOS</span>
-              <div className="text-4xl font-black">{soldProducts}</div>
+          {/* Sold */}
+          <div className="bg-[--color-surface-container-lowest] p-8 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[--color-secondary-container]/20 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <p className="text-[--color-on-surface-variant] font-medium text-sm">Total vendidos</p>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-[--color-on-surface]">{soldProducts}</span>
+              <span className="text-emerald-600 text-sm font-bold">✓ completados</span>
             </div>
-            <CheckCircle size={80} className="absolute -bottom-4 -right-4 text-white opacity-10" />
+            <div className="mt-6 flex gap-1 items-end h-8">
+              {[40, 60, 50, 80, 30].map((h, i) => (
+                <div
+                  key={i}
+                  className={`flex-1 rounded-t-sm ${i === 3 ? "bg-[--color-secondary-container]" : "bg-[--color-secondary-container]/40"}`}
+                  style={{ height: `${h}%` }}
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="bg-neutral-900 rounded-3xl p-6 text-white shadow-lg shadow-neutral-900/20 relative overflow-hidden">
-            <div className="relative z-10">
-              <span className="text-neutral-400 font-semibold mb-1 block tracking-wide">INGRESOS ES.</span>
-              <div className="text-3xl font-black">
-                ${new Intl.NumberFormat('es-CO').format(estimatedRevenue)}
+          {/* Revenue */}
+          <div className="bg-[--color-surface-container-lowest] p-8 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[--color-tertiary-fixed]/30 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <p className="text-[--color-on-surface-variant] font-medium text-sm">Ingresos estimados</p>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-[--color-on-surface]">{revenueFormatted}</span>
+            </div>
+            <div className="mt-6 flex items-center gap-2">
+              <div className="flex -space-x-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className={`w-6 h-6 rounded-full border-2 border-white bg-slate-${200 + i * 100}`} />
+                ))}
               </div>
+              <span className="text-xs text-[--color-on-surface-variant] font-medium">
+                Basado en ventas registradas
+              </span>
             </div>
-            <TrendingUp size={80} className="absolute -bottom-4 -right-4 text-white opacity-5" />
           </div>
-        </div>
+        </section>
 
-        {/* My Products Table */}
-        <div className="bg-white rounded-3xl border border-neutral-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50/50">
-            <h2 className="text-xl font-bold text-neutral-900">Mis Anuncios</h2>
-            <Link href="/products/create" className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors">
-              <Plus size={18} /> Nuevo Anuncio
+        {/* ── Product List ── */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold tracking-tight text-[--color-on-surface]">Mis anuncios</h2>
+            <Link
+              href="/products/create"
+              className="text-[--color-primary] font-bold text-sm hover:underline"
+            >
+              Ver todos
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white border-b border-neutral-100 text-sm text-neutral-400">
-                  <th className="p-4 font-semibold w-16">Foto</th>
-                  <th className="p-4 font-semibold">Producto</th>
-                  <th className="p-4 font-semibold">Precio / Stock</th>
-                  <th className="p-4 font-semibold text-center">Estado</th>
-                  <th className="p-4 font-semibold text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {loading ? (
-                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400"><Loader2 className="animate-spin mx-auto" /></td></tr>
-                ) : products.length === 0 ? (
-                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400 font-medium">Aún no tienes productos publicados</td></tr>
-                ) : (
-                  products.map(product => (
-                    <tr key={product.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="p-4">
-                        <div className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden border border-neutral-200">
-                          {product.images[0] ? (
-                            <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <Package className="w-6 h-6 m-3 text-neutral-300" />
-                          )}
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-[--color-surface-container-lowest] p-4 rounded-2xl flex items-center gap-6 animate-pulse">
+                  <div className="w-20 h-20 rounded-xl skeleton flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 skeleton w-1/2" />
+                    <div className="h-3 skeleton w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-[--color-surface-container-lowest] rounded-2xl text-center">
+              <span className="material-symbols-outlined text-5xl text-[--color-outline] mb-4">inventory_2</span>
+              <p className="text-[--color-on-surface-variant] font-medium text-lg">Aún no tienes productos publicados</p>
+              <Link
+                href="/products/create"
+                className="mt-6 px-6 py-2.5 bg-[--color-primary] text-[--color-on-primary] rounded-2xl font-bold shadow-lg shadow-[--color-primary]/20 hover:opacity-90 transition-all"
+              >
+                Publicar primer anuncio
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {products.map((product) => {
+                const price = new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: product.currency,
+                  maximumFractionDigits: 0,
+                }).format(product.price);
+
+                const statusColor =
+                  product.status === "active"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : product.status === "sold"
+                    ? "bg-[--color-secondary-fixed] text-[--color-on-secondary-container]"
+                    : product.status === "paused"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-[--color-error-container] text-[--color-error]";
+
+                const statusLabel =
+                  product.status === "active" ? "Activo" :
+                  product.status === "sold"   ? "Vendido" :
+                  product.status === "paused" ? "Pausado" : "Eliminado";
+
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-[--color-surface-container-lowest] p-4 rounded-2xl shadow-sm flex items-center group transition-all hover:bg-[--color-surface-bright]"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-[--color-surface-container] mr-6 flex-shrink-0">
+                      {product.images[0] ? (
+                        <Image
+                          src={product.images[0]}
+                          alt={product.title}
+                          width={80}
+                          height={80}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[--color-outline]">image</span>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-neutral-900 line-clamp-1">{product.title}</div>
-                        <div className="text-xs text-neutral-500 flex items-center gap-2 mt-1">
-                          {product.ratingCount > 0 && <span className="flex items-center text-amber-500"><Star size={12} fill="currentColor" className="mr-0.5" /> {product.rating.toFixed(1)}</span>}
-                          {product.views} vistas
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-neutral-800">${new Intl.NumberFormat('es-CO').format(product.price)}</div>
-                        <div className="text-xs text-neutral-400 font-medium">Stock: {product.quantity ?? 1}</div>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2.5 py-1 text-xs font-bold rounded-full capitalize 
-                            ${product.status === 'active' ? 'bg-green-100 text-green-700' :
-                            product.status === 'sold' ? 'bg-indigo-100 text-indigo-700' :
-                              product.status === 'paused' ? 'bg-amber-100 text-amber-700' :
-                                'bg-red-100 text-red-700'}`}>
-                          {product.status}
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-[--color-on-surface] text-lg truncate">
+                        {product.title}
+                      </h4>
+                      <div className="flex items-center gap-3 mt-1 flex-wrap">
+                        <span className="text-sm text-[--color-on-surface-variant]">
+                          {product.category}
                         </span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex justify-center gap-2">
-                          <Link href={`/products/${product.id}`} className="p-2 text-neutral-400 hover:text-indigo-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Ver publicación">
-                            <Eye size={18} />
-                          </Link>
-                          <Link href={`/products/edit/${product.id}`} className="p-2 text-neutral-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar">
-                            <Edit size={18} />
-                          </Link>
-                          {product.status !== 'sold' && product.status !== 'deleted' && (
-                            <button onClick={() => toggleStatus(product)} className="p-2 text-neutral-400 hover:text-neutral-800 hover:bg-neutral-200 rounded-lg transition-colors" title={product.status === 'active' ? 'Pausar' : 'Activar'}>
-                              {product.status === 'active' ? <PauseCircle size={18} /> : <PlayCircle size={18} />}
-                            </button>
+                        <span
+                          className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase ${statusColor}`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Price / stock */}
+                    <div className="text-right mr-8 hidden md:block flex-shrink-0">
+                      <p className="text-sm font-bold text-[--color-on-surface]">{price}</p>
+                      <p className="text-xs text-[--color-on-surface-variant]">
+                        {product.quantity ?? 1} en stock
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Link
+                        href={`/products/${product.id}`}
+                        className="p-2 rounded-xl text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high] transition-colors"
+                        title="Ver publicación"
+                      >
+                        <span className="material-symbols-outlined">visibility</span>
+                      </Link>
+                      <Link
+                        href={`/products/edit/${product.id}`}
+                        className="p-2 rounded-xl text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high] transition-colors"
+                        title="Editar"
+                      >
+                        <span className="material-symbols-outlined">edit</span>
+                      </Link>
+                      {product.status !== "sold" && product.status !== "deleted" && (
+                        <button
+                          onClick={() => toggleStatus(product)}
+                          className="p-2 rounded-xl text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high] transition-colors"
+                          title={product.status === "active" ? "Pausar" : "Activar"}
+                        >
+                          {product.status === "active" ? (
+                            <PauseCircle size={22} />
+                          ) : (
+                            <PlayCircle size={22} />
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </main>
+
+      <BottomNav activeTab="profile" />
     </div>
   );
 }

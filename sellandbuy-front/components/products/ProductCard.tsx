@@ -1,100 +1,94 @@
-"use client"
-import React from 'react';
-import Link from 'next/link';
-import { Product } from '../../types/product';
-import { MapPin, Heart, Package } from 'lucide-react';
+"use client";
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Product } from "../../types/product";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  // Use first image or a placeholder
-  const imageUrl = product.images.length > 0 
-    ? product.images[0] 
-    : 'https://via.placeholder.com/400x400?text=No+Image';
+  const imageUrl =
+    product.images.length > 0
+      ? product.images[0]
+      : "https://via.placeholder.com/400x400?text=Sin+imagen";
 
-  const formattedPrice = new Intl.NumberFormat('es-CO', {
-    style: 'currency',
+  const formattedPrice = new Intl.NumberFormat("es-CO", {
+    style: "currency",
     currency: product.currency,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(product.price);
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-neutral-100 overflow-hidden transform hover:-translate-y-1">
-      {/* Image Container */}
-      <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-neutral-100">
-        <img
+    <div className="group relative flex flex-col bg-[--color-surface-container-lowest] rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-[--color-primary]/5">
+
+      {/* Image */}
+      <Link
+        href={`/products/${product.id}`}
+        className="relative aspect-[4/5] overflow-hidden block"
+      >
+        <Image
           src={imageUrl}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
         />
-        
-        {/* Badges/Overlays overlay */}
-        <div className="absolute top-3 w-full px-3 flex justify-between items-start">
-          <div className="flex flex-col gap-1.5">
-             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full shadow-sm backdrop-blur-md 
-               ${product.condition === 'new' ? 'bg-blue-600/90 text-white' : 'bg-white/90 text-neutral-800'}`}>
-               {product.condition === 'new' ? 'Nuevo' : 'Usado'}
-             </span>
-             {product.status !== 'active' && (
-                <span className="px-2.5 py-1 text-xs font-semibold bg-neutral-900/90 text-white rounded-full shadow-sm backdrop-blur-md capitalize">
-                  {product.status}
-                </span>
-             )}
-             {(product.quantity ?? 1) > 0 && (
-                <span className="px-2.5 py-1 text-[10px] font-bold bg-amber-100 text-amber-800 rounded-full shadow-sm">
-                  {product.quantity === 1 ? 'Última unidad' : `${product.quantity} disp.`}
-                </span>
-             )}
-          </div>
-          <button className="p-2 rounded-full bg-white/50 backdrop-blur-md hover:bg-white text-neutral-600 hover:text-red-500 transition-colors shadow-sm">
-            <Heart size={18} />
-          </button>
+
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Wishlist button */}
+        <button
+          className="absolute top-3 right-3 h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-error] transition-colors opacity-0 group-hover:opacity-100"
+          onClick={(e) => e.preventDefault()}
+          aria-label="Guardar en favoritos"
+        >
+          <span className="material-symbols-outlined text-[20px]">favorite</span>
+        </button>
+
+        {/* Condition badge bottom-left */}
+        <div className="absolute bottom-3 left-3 flex gap-2">
+          <span
+            className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase backdrop-blur-md ${
+              product.condition === "new"
+                ? "bg-white/90 text-slate-900"
+                : "bg-[--color-secondary-container] text-[--color-on-secondary-container]"
+            }`}
+          >
+            {product.condition === "new" ? "Nuevo" : "Usado"}
+          </span>
+          {product.status !== "active" && (
+            <span className="px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase bg-black/60 text-white backdrop-blur-md capitalize">
+              {product.status === "sold"
+                ? "Vendido"
+                : product.status === "paused"
+                ? "Pausado"
+                : product.status}
+            </span>
+          )}
         </div>
       </Link>
 
-      {/* Content Container */}
-      <div className="flex flex-col flex-1 p-4">
-        {/* Category & Location */}
-        <div className="flex justify-between items-center text-neutral-500 text-xs font-medium mb-2">
-           <span className="flex items-center gap-1">
-             <Package size={14} />
-             {product.category}
-           </span>
-           <span className="flex items-center gap-1">
-             <MapPin size={14} />
-             {product.location?.city || 'Desconocido'}
-           </span>
-        </div>
-
-        {/* Title */}
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-5 space-y-1">
         <Link href={`/products/${product.id}`}>
-          <h3 className="text-lg font-bold text-neutral-900 leading-tight mb-1 group-hover:text-amber-600 transition-colors line-clamp-2">
+          <h3 className="font-bold text-[--color-on-surface] leading-tight group-hover:text-[--color-primary] transition-colors line-clamp-1">
             {product.title}
           </h3>
         </Link>
-        <p className="text-sm text-neutral-500 line-clamp-1 mb-4 flex-1">
+        <p className="text-sm text-[--color-on-surface-variant] line-clamp-1">
           {product.description}
         </p>
 
-        {/* Footer/Price */}
-        <div className="flex justify-between items-end mt-auto pt-4 border-t border-neutral-100">
-          <div className="flex flex-col">
-            <span className="text-xs text-neutral-400 font-medium tracking-wide">PRECIO</span>
-            <span className="text-xl font-black text-neutral-900">{formattedPrice}</span>
-          </div>
-          
-          {/* Seller short info */}
-          <div className="flex items-center gap-2">
-             {product.sellerPhoto ? (
-               <img src={product.sellerPhoto} alt={product.sellerName} className="w-6 h-6 rounded-full object-cover" />
-             ) : (
-               <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold">
-                 {product.sellerName?.charAt(0) || '?'}
-               </div>
-             )}
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 mt-auto">
+          <p className="text-[--color-primary] font-extrabold text-lg">{formattedPrice}</p>
+          <div className="flex items-center gap-1.5 text-[--color-on-surface-variant] text-xs">
+            <span className="material-symbols-outlined text-[16px]">location_on</span>
+            <span>{product.location?.city || "—"}</span>
           </div>
         </div>
       </div>

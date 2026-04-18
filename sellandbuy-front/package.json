@@ -2,8 +2,9 @@
   "name": "sellandbuy-front",
   "version": "0.1.0",
   "private": true,
+  "dev": "next dev --no-turbo",
   "scripts": {
-    "dev": "next dev",
+    "dev": "PATH=$PATH:/usr/local/bin next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
