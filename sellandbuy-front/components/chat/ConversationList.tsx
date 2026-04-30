@@ -105,6 +105,8 @@ export function ConversationList() {
                       <img src={conv.productImage} className="w-full h-full object-cover" />
                     </div>
                   )}
+                  {/* Mock Online Indicator (UX requirement) */}
+                  <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                 </div>
 
                 <div className="flex-1 min-w-0 pr-2">

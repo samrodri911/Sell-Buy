@@ -1,94 +1,172 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getProducts } from '@/services/product.service';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Product } from '@/types/product';
-import Link from 'next/link';
-import { Loader2, Plus, Filter, AlertTriangle, MessageSquare } from 'lucide-react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { SkeletonList } from '@/components/ui/Skeleton';
+
+const CATEGORIES = [
+  { id: '', label: 'Todo' },
+  { id: 'Electronics', label: 'Electrónica' },
+  { id: 'Vehicles', label: 'Vehículos' },
+  { id: 'Real Estate', label: 'Inmuebles' },
+  { id: 'Home', label: 'Hogar' },
+  { id: 'Fashion', label: 'Moda' },
+  { id: 'Other', label: 'Otros' }
+];
 
 export default function ProductsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Persist state via URL
+  const currentCategory = searchParams.get('category') || '';
+  const currentSort = searchParams.get('sort') || 'recent';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [category, setCategory] = useState<string>('');
+
+  // Update URL params without full page reload
+  const updateQuery = useCallback((key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.replace(`/products?${params.toString()}`, { scroll: false });
+  }, [searchParams, router]);
 
   useEffect(() => {
     async function loadProducts() {
       setLoading(true);
       setError(null);
       try {
-        const result = await getProducts(category ? { category } : {});
-        setProducts(result.products);
+        const queryOpts = currentCategory ? { category: currentCategory } : {};
+        const result = await getProducts(queryOpts);
+        
+        // Helper robusto para obtener milisegundos de cualquier formato de fecha
+        const getMillis = (date: any) => {
+          if (!date) return 0;
+          if (typeof date.toMillis === 'function') return date.toMillis();
+          if (date.seconds) return date.seconds * 1000;
+          if (date instanceof Date) return date.getTime();
+          if (typeof date === 'string') return new Date(date).getTime();
+          if (typeof date === 'number') return date;
+          return 0;
+        };
+
+        // Client-side sorting as a temporary measure if Firebase indices aren't fully set
+        let sortedProducts = [...result.products];
+        if (currentSort === 'price_asc') {
+          sortedProducts.sort((a, b) => a.price - b.price);
+        } else if (currentSort === 'price_desc') {
+          sortedProducts.sort((a, b) => b.price - a.price);
+        } else {
+          // 'recent'
+          sortedProducts.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
+        }
+        
+        setProducts(sortedProducts);
       } catch (err: any) {
         console.error(err);
-        // Check if it's a missing index error
         if (err?.message?.includes('index') || err?.code === 'failed-precondition') {
-          setError('Firestore requiere un índice compuesto. Revisa la consola del navegador para obtener el link de creación.');
+          setError('Configurando base de datos. Por favor intenta más tarde.');
         } else {
-          setError(err?.message || 'Error al cargar productos');
+          setError('Ocurrió un error al cargar los productos. Por favor recarga la página.');
         }
       } finally {
         setLoading(false);
       }
     }
     loadProducts();
-  }, [category]);
+  }, [currentCategory, currentSort]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight text-neutral-900">Descubre Productos</h1>
-            <p className="text-neutral-500 mt-1">Encuentra exactamente lo que estás buscando</p>
+    <MainLayout>
+      <div className="flex flex-col gap-8">
+        
+        {/* Header & Filters */}
+        <div className="flex flex-col gap-6 pt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
+                Descubre
+              </h1>
+              <p className="text-neutral-500 mt-1 text-sm md:text-base">
+                Encuentra exactamente lo que estás buscando
+              </p>
+            </div>
+            
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-neutral-500 hidden sm:inline">Ordenar por:</span>
+              <select 
+                value={currentSort}
+                onChange={(e) => updateQuery('sort', e.target.value)}
+                className="bg-white border border-neutral-200/80 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-neutral-300 transition-colors shadow-sm outline-none appearance-none cursor-pointer"
+              >
+                <option value="recent">Más recientes</option>
+                <option value="price_asc">Menor precio</option>
+                <option value="price_desc">Mayor precio</option>
+              </select>
+            </div>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link href="/messages" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-full font-semibold hover:bg-neutral-100 transition-colors shadow-sm">
-              <MessageSquare size={18} />
-              Mensajes
-            </Link>
-            <select 
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="flex-1 md:flex-none bg-white border border-neutral-200 text-neutral-700 px-4 py-3 rounded-full font-semibold hover:bg-neutral-50 transition-colors shadow-sm outline-none appearance-none"
-            >
-              <option value="">Todas las categorías</option>
-              <option value="Electronics">Electrónica</option>
-              <option value="Vehicles">Vehículos</option>
-              <option value="Real Estate">Inmuebles</option>
-              <option value="Home">Hogar</option>
-              <option value="Fashion">Moda</option>
-              <option value="Other">Otros</option>
-            </select>
-            <Link href="/products/create" className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-neutral-900 text-white px-6 py-3 rounded-full font-bold hover:bg-neutral-800 transition-colors shadow-lg shadow-neutral-900/20">
-              <Plus size={20} />
-              Publicar
-            </Link>
+
+          {/* Category Chips (Horizontal Scroll) */}
+          <div className="flex overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-2 hide-scrollbar">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id || 'all'}
+                onClick={() => updateQuery('category', cat.id)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  currentCategory === cat.id 
+                    ? 'bg-neutral-900 text-white shadow-md' 
+                    : 'bg-white border border-neutral-200/80 text-neutral-600 hover:bg-neutral-50'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 size={40} className="animate-spin text-amber-500" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-16 bg-red-50 rounded-3xl border border-red-100 shadow-sm">
-            <AlertTriangle size={40} className="mx-auto text-red-400 mb-4" />
-            <p className="text-red-600 font-semibold text-lg mb-2">Error al cargar productos</p>
-            <p className="text-red-500 text-sm max-w-md mx-auto">{error}</p>
-          </div>
-        ) : products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        {/* Content Grid */}
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-red-50/50 rounded-3xl border border-red-100">
+            <span className="material-symbols-outlined text-red-400 text-5xl mb-3">error</span>
+            <p className="text-red-800 font-semibold text-lg">Error al cargar</p>
+            <p className="text-red-500 text-sm max-w-md text-center mt-1">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-6 text-red-600 font-medium hover:underline text-sm">
+              Intentar nuevamente
+            </button>
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-3xl border border-neutral-100 shadow-sm col-span-full">
-            <p className="text-neutral-400 text-lg">No hay productos disponibles por el momento.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+            {loading ? (
+              <SkeletonList count={10} />
+            ) : products.length > 0 ? (
+              products.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center py-24 bg-neutral-50/50 rounded-3xl border border-dashed border-neutral-200">
+                <span className="material-symbols-outlined text-neutral-300 text-6xl mb-4">search_off</span>
+                <p className="text-neutral-500 font-medium text-lg">No encontramos productos</p>
+                <p className="text-neutral-400 text-sm mt-1">Prueba quitando algunos filtros</p>
+                {currentCategory && (
+                  <button onClick={() => updateQuery('category', '')} className="mt-4 text-[--color-primary] font-medium hover:underline text-sm">
+                    Ver todos los productos
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
-    </div>
+    </MainLayout>
   );
 }
