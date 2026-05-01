@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
 
-First, run the development server:
+# Sell&Buy
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Sell&Buy es una plataforma de compra y venta moderna, diseñada para facilitar las transacciones entre compradores y
+vendedores. El proyecto fue desarrollado con un enfoque en la escalabilidad y la experiencia del usuario.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Características
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Interfaz Moderna**: Diseño limpio y fácil de usar.
 
-## Learn More
+- **Backend Escalable**: Arquitectura robusta para manejar alta carga.
 
-To learn more about Next.js, take a look at the following resources:
+- **Integración de IA**: Opcional uso de inteligencia artificial para mejorar la experiencia del usuario.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tecnologías
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Frontend**: Next.js, React
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Backend**: Node.js, Firebase
+
+- **Base de Datos**: Firestore
+
+- **Autenticación**: Firebase Auth
+
+- **Subida de Archivos**: Firebase Storage
+
+
+## Arquitectura
+
+
+La arquitectura del proyecto está dividida en dos partes principales: el frontend y el backend.
+
+
+### Frontend
+
+
+El frontend se desarrolla con Next.js, lo que permite una aplicación universal y un excelente rendimiento. El proyecto
+utiliza componentes reutilizables y hooks personalizados para gestionar la lógica de negocio.
+
+
+### Backend
+
+
+El backend está basado en Node.js y utiliza Firebase para el manejo de autenticación, almacenamiento de datos y subida
+de archivos. La arquitectura es escalable y puede ser fácilmente extendida.
+
+
+## Instalación
+
+
+Para instalar y ejecutar el proyecto localmente, sigue estos pasos:
+
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/tu-repositorio/sell-and-buy.git
+   cd sell-and-buy
+
+ 2 Instala las dependencias:
+
+
+   npm install
+
+   # o
+
+   yarn install
+
+   # o
+
+   pnpm install
+
+   # o
+
+   bun install
+
+ 3 Configura las variables de entorno en un archivo .env.local basado en el ejemplo .env.example.
+ 4 Inicia el servidor de desarrollo:
+
+
+   npm run dev
+
+   # o
+
+   yarn dev
+
+   # o
+
+   pnpm dev
+
+   # o
+
+   bun dev
+
+
+
+Uso
+
+Para usar la plataforma, sigue estos pasos:
+
+ 1 Abre http://localhost:3000 en tu navegador.
+ 2 Inicia sesión con Google o crea una cuenta nueva.
+
+
+Estructura del Proyecto
+
+La estructura del proyecto está organizada de la siguiente manera:
+
+ • app/: Contiene los componentes y páginas principales de la aplicación.
+ • components/: Componentes reutilizables para la interfaz de usuario.
+ • hooks/: Hooks personalizados para gestionar lógica de negocio.
+ • lib/: Servicios y funciones auxiliares.
+ • services/: Servicios para interactuar con Firebase y otras APIs.
+ • types/: Tipos de datos utilizados en el proyecto.
+
+
+Uso de IA en el Desarrollo
+
+El proyecto incluye la opción de integrar inteligencia artificial para mejorar la experiencia del usuario. La IA se
+utiliza en funciones como la generación de productos y sugerencias de precios.

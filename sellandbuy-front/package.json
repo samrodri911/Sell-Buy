@@ -4,7 +4,7 @@
   "private": true,
   "dev": "next dev --no-turbo",
   "scripts": {
-    "dev": "PATH=$PATH:/usr/local/bin next dev",
+    "dev": " next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
