@@ -31,7 +31,7 @@ export default function DashboardPage() {
     if (firebaseUser) {
       loadMyProducts();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser]);
 
   const loadMyProducts = async () => {
@@ -50,7 +50,7 @@ export default function DashboardPage() {
   };
 
   const activeProducts = products.filter((p) => p.status === "active").length;
-  const soldProducts   = products.filter((p) => p.status === "sold").length;
+  const soldProducts = products.filter((p) => p.status === "sold").length;
 
   // 💰 Real revenue = sum of actually SOLD products
   const realRevenue = products
@@ -113,7 +113,7 @@ export default function DashboardPage() {
               Mi Tienda
             </span>
             <h1 className="text-4xl font-bold tracking-tight text-[--color-on-surface] mt-1">
-              Hola, {userProfile?.displayName?.split(" ")[0]} 👋
+              Hola, {userProfile?.displayName?.split(" ")[0]}
             </h1>
           </div>
           <div className="flex gap-3">
@@ -205,19 +205,18 @@ export default function DashboardPage() {
           {/* Status Filter Tabs */}
           <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
             {([
-              { key: "all",    label: "Todos",   count: products.length },
+              { key: "all", label: "Todos", count: products.length },
               { key: "active", label: "Activos", count: activeProducts },
-              { key: "sold",   label: "Vendidos", count: soldProducts },
+              { key: "sold", label: "Vendidos", count: soldProducts },
               { key: "paused", label: "Pausados", count: products.filter(p => p.status === "paused").length },
             ] as const).map(({ key, label, count }) => (
               <button
                 key={key}
                 onClick={() => setStatusFilter(key)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
-                  statusFilter === key
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${statusFilter === key
                     ? "bg-[--color-primary] text-[--color-on-primary] shadow-sm"
                     : "bg-[--color-surface-container] text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high]"
-                }`}
+                  }`}
               >
                 {label} <span className="opacity-70">({count})</span>
               </button>
@@ -264,15 +263,15 @@ export default function DashboardPage() {
                   product.status === "active"
                     ? "bg-emerald-100 text-emerald-700"
                     : product.status === "sold"
-                    ? "bg-[--color-secondary-fixed] text-[--color-on-secondary-container]"
-                    : product.status === "paused"
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-[--color-error-container] text-[--color-error]";
+                      ? "bg-[--color-secondary-fixed] text-[--color-on-secondary-container]"
+                      : product.status === "paused"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-[--color-error-container] text-[--color-error]";
 
                 const statusLabel =
                   product.status === "active" ? "Activo" :
-                  product.status === "sold"   ? "Vendido" :
-                  product.status === "paused" ? "Pausado" : "Eliminado";
+                    product.status === "sold" ? "Vendido" :
+                      product.status === "paused" ? "Pausado" : "Eliminado";
 
                 return (
                   <div
