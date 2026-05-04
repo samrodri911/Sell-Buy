@@ -43,3 +43,9 @@ next-env.d.ts
 # Aider
 .aider*
 *aider*
+
+#node_modules
+node_modules/
+
+#cache
+.cache/
