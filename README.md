@@ -112,15 +112,15 @@ Componentes → Hooks → Services → Firebase / API Routes
 
    ```env
    # Firebase Config
-   NEXT_PUBLIC_FIREBASE_API_KEY=tu-api-key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu-proyecto-id
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu-bucket.appspot.com
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu-sender-id
-   NEXT_PUBLIC_FIREBASE_APP_ID=tu-app-id
+   NEXT_PUBLIC_FIREBASE_API_KEY=***
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=***
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=***
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=***
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=***
+   NEXT_PUBLIC_FIREBASE_APP_ID***
 
    # Google Gemini AI (opcional)
-   GEMINI_API_KEY=tu-gemini-api-key
+   GEMINI_API_KEY=***
    ```
 
 4. **Configurar Firebase**
