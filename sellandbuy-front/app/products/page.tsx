@@ -124,12 +124,12 @@ export default function ProductsPage() {
             {/* Sort Dropdown: Only show when not in search mode */}
             {!isSearchMode && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-neutral-500 hidden sm:inline">Ordenar por:</span>
+                <span className="text-sm font-medium text-neutral-500 hidden sm:inline ">Ordenar por:</span>
                 <select 
                   value={currentSort}
                   onChange={(e) => updateQuery('sort', e.target.value)}
                   className="bg-white border border-neutral-200/80 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-neutral-300 transition-colors shadow-sm outline-none appearance-none cursor-pointer"
-                >
+                > 
                   <option value="recent">Más recientes</option>
                   <option value="price_asc">Menor precio</option>
                   <option value="price_desc">Mayor precio</option>
@@ -145,7 +145,7 @@ export default function ProductsPage() {
                 <button
                   key={cat.id || 'all'}
                   onClick={() => updateQuery('category', cat.id)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                     currentCategory === cat.id 
                       ? 'bg-neutral-900 text-white shadow-md' 
                       : 'bg-white border border-neutral-200/80 text-neutral-600 hover:bg-neutral-50'

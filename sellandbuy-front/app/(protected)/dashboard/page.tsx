@@ -213,7 +213,7 @@ export default function DashboardPage() {
               <button
                 key={key}
                 onClick={() => setStatusFilter(key)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${
                   statusFilter === key
                     ? "bg-[--color-primary] text-[--color-on-primary] shadow-sm"
                     : "bg-[--color-surface-container] text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high]"

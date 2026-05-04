@@ -91,19 +91,18 @@ function ProfileProductCard({ product }: { product: Product }) {
         </p>
         <div className="flex justify-between items-center">
           <span
-            className={`text-xs px-2 py-1 rounded-md font-medium ${
-              product.status === "active"
-                ? "bg-emerald-100 text-emerald-700"
-                : product.status === "sold"
+            className={`text-xs px-2 py-1 rounded-md font-medium ${product.status === "active"
+              ? "bg-emerald-100 text-emerald-700"
+              : product.status === "sold"
                 ? "bg-[--color-secondary-fixed] text-[--color-on-secondary-container]"
                 : "bg-amber-100 text-amber-700"
-            }`}
+              }`}
           >
             {product.status === "active"
               ? "Activo"
               : product.status === "sold"
-              ? "Vendido"
-              : "Pausado"}
+                ? "Vendido"
+                : "Pausado"}
           </span>
           <button className="text-[--color-primary] p-2 hover:bg-[--color-primary]/5 rounded-full transition-colors cursor-pointer">
             <span className="material-symbols-outlined text-[20px]">more_horiz</span>
@@ -191,18 +190,16 @@ function TabButton({
   return (
     <button onClick={onClick} className="group relative py-2 cursor-pointer">
       <span
-        className={`text-lg font-bold transition-colors ${
-          active
-            ? "text-[--color-primary]"
-            : "text-[--color-on-surface-variant] hover:text-[--color-on-surface]"
-        }`}
+        className={`text-lg font-bold transition-colors ${active
+          ? "text-[--color-primary]"
+          : "text-[--color-on-surface-variant] hover:text-[--color-on-surface]"
+          }`}
       >
         {label}
       </span>
       <span
-        className={`absolute bottom-0 left-0 h-1 bg-[--color-primary] rounded-full transition-all duration-300 ${
-          active ? "w-full" : "w-0 group-hover:w-full"
-        }`}
+        className={`absolute bottom-0 left-0 h-1 bg-[--color-primary] rounded-full transition-all duration-300 ${active ? "w-full" : "w-0 group-hover:w-full"
+          }`}
       />
     </button>
   );
@@ -315,7 +312,7 @@ export default function UserProfilePage() {
           </p>
           <Link
             href="/products"
-            className="bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-3 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all cursor-pointer"
+            className="bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-3 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all"
           >
             Explorar productos
           </Link>
@@ -432,23 +429,25 @@ export default function UserProfilePage() {
                         Editar Perfil
                       </button>
                     )}
-                    <button className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">share</span>
-                        Compartir perfil
-                      </button>
-                    </div>
+                    <button
+                      className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">share</span>
+                      Compartir perfil
+                    </button>
                   </div>
-
+                </>
+              )}
+            </div>
             {/* Stats bento — desktop only */}
             <div className="hidden lg:grid grid-cols-2 gap-4 w-64 flex-shrink-0">
-              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center cursor-pointer">
+              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center">
                 <p className="text-2xl font-bold text-[--color-primary]">{soldItems.length}</p>
                 <p className="text-xs font-medium text-[--color-on-surface-variant] uppercase tracking-wider mt-1">
                   Vendidos
                 </p>
               </div>
-              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center cursor-pointer">
+              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center">
                 <p className="text-2xl font-bold text-[--color-primary]">{activeListings.length}</p>
                 <p className="text-xs font-medium text-[--color-on-surface-variant] uppercase tracking-wider mt-1">
                   Activos
@@ -459,7 +458,7 @@ export default function UserProfilePage() {
         </section>
 
         {/* ── Tabs ── */}
-        <nav className="flex gap-8 mb-8 border-b border-[--color-outline-variant]/30 cursor-pointer">
+        <nav className="flex gap-8 mb-8 border-b border-[--color-outline-variant]/30">
           <TabButton
             label="Publicaciones activas"
             active={activeTab === "listings"}
@@ -556,7 +555,7 @@ export default function UserProfilePage() {
             {isOwner && (
               <Link
                 href="/dashboard"
-                className="flex items-center gap-3 p-4 bg-[--color-surface-container-low] rounded-2xl hover:bg-[--color-surface-container] transition-colors cursor-pointer"
+                className="flex items-center gap-3 p-4 bg-[--color-surface-container-low] rounded-2xl hover:bg-[--color-surface-container] transition-colors"
               >
                 <span className="material-symbols-outlined text-[--color-primary]">
                   dashboard
