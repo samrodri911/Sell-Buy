@@ -105,7 +105,7 @@ function ProfileProductCard({ product }: { product: Product }) {
               ? "Vendido"
               : "Pausado"}
           </span>
-          <button className="text-[--color-primary] p-2 hover:bg-[--color-primary]/5 rounded-full transition-colors">
+          <button className="text-[--color-primary] p-2 hover:bg-[--color-primary]/5 rounded-full transition-colors cursor-pointer">
             <span className="material-symbols-outlined text-[20px]">more_horiz</span>
           </button>
         </div>
@@ -154,7 +154,7 @@ function EditForm({
         <button
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-2 bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-2.5 rounded-2xl font-semibold shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-60"
+          className="flex items-center gap-2 bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-2.5 rounded-2xl font-semibold shadow-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 cursor-pointer"
         >
           {saving ? (
             <span className="material-symbols-outlined text-[18px] animate-spin">
@@ -168,7 +168,7 @@ function EditForm({
         <button
           onClick={onCancel}
           disabled={saving}
-          className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all disabled:opacity-60"
+          className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all disabled:opacity-60 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">close</span>
           Cancelar
@@ -189,7 +189,7 @@ function TabButton({
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className="group relative py-2">
+    <button onClick={onClick} className="group relative py-2 cursor-pointer">
       <span
         className={`text-lg font-bold transition-colors ${
           active
@@ -315,7 +315,7 @@ export default function UserProfilePage() {
           </p>
           <Link
             href="/products"
-            className="bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-3 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all"
+            className="bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-3 rounded-2xl font-bold shadow-lg hover:opacity-90 transition-all cursor-pointer"
           >
             Explorar productos
           </Link>
@@ -426,30 +426,29 @@ export default function UserProfilePage() {
                     {isOwner && (
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-2.5 rounded-2xl font-semibold shadow-lg hover:opacity-90 active:scale-95 transition-all"
+                        className="flex items-center gap-2 bg-gradient-to-r from-[--color-primary] to-[--color-primary-container] text-[--color-on-primary] px-6 py-2.5 rounded-2xl font-semibold shadow-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                         Editar Perfil
                       </button>
                     )}
-                    <button className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all">
-                      <span className="material-symbols-outlined text-[18px]">share</span>
-                      Compartir perfil
-                    </button>
+                    <button className="flex items-center gap-2 bg-[--color-surface-container-high] text-[--color-on-secondary-container] px-6 py-2.5 rounded-2xl font-semibold hover:bg-[--color-surface-container-highest] active:scale-95 transition-all cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">share</span>
+                        Compartir perfil
+                      </button>
+                    </div>
                   </div>
-                </>
-              )}
-            </div>
 
             {/* Stats bento — desktop only */}
             <div className="hidden lg:grid grid-cols-2 gap-4 w-64 flex-shrink-0">
-              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center">
+              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center cursor-pointer">
                 <p className="text-2xl font-bold text-[--color-primary]">{soldItems.length}</p>
                 <p className="text-xs font-medium text-[--color-on-surface-variant] uppercase tracking-wider mt-1">
                   Vendidos
                 </p>
               </div>
-              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center">
+              <div className="bg-[--color-surface-container-low] p-4 rounded-2xl text-center cursor-pointer">
                 <p className="text-2xl font-bold text-[--color-primary]">{activeListings.length}</p>
                 <p className="text-xs font-medium text-[--color-on-surface-variant] uppercase tracking-wider mt-1">
                   Activos
@@ -460,7 +459,7 @@ export default function UserProfilePage() {
         </section>
 
         {/* ── Tabs ── */}
-        <nav className="flex gap-8 mb-8 border-b border-[--color-outline-variant]/30">
+        <nav className="flex gap-8 mb-8 border-b border-[--color-outline-variant]/30 cursor-pointer">
           <TabButton
             label="Publicaciones activas"
             active={activeTab === "listings"}
@@ -557,7 +556,7 @@ export default function UserProfilePage() {
             {isOwner && (
               <Link
                 href="/dashboard"
-                className="flex items-center gap-3 p-4 bg-[--color-surface-container-low] rounded-2xl hover:bg-[--color-surface-container] transition-colors"
+                className="flex items-center gap-3 p-4 bg-[--color-surface-container-low] rounded-2xl hover:bg-[--color-surface-container] transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[--color-primary]">
                   dashboard
