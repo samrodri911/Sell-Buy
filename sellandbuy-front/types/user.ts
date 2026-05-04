@@ -54,6 +54,8 @@ export interface AuthActions {
     displayName: string
   ) => Promise<void>;
   logout: () => Promise<void>;
+  /** Sends/resends a Firebase email verification link to the current user */
+  sendVerificationEmail: () => Promise<void>;
   /** Re-fetch the user profile from Firestore */
   refreshProfile: () => Promise<void>;
   /** Clear the error state */

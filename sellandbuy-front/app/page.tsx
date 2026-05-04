@@ -47,7 +47,6 @@ export default function HomePage() {
       } else {
         await loginWithEmail(email, password);
       }
-      router.replace("/products");
     } catch {
       // Error is handled by context
     } finally {
@@ -135,7 +134,7 @@ export default function HomePage() {
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-neutral-200 text-neutral-700 px-4 py-3 rounded-xl font-medium hover:bg-neutral-50 hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+            className="w-full flex items-center justify-center gap-3 bg-white border border-neutral-200 text-neutral-700 px-4 py-3 rounded-xl font-medium hover:bg-neutral-50 hover:shadow-sm hover:cursor-pointer hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
           >
             <svg viewBox="0 0 24 24" width="20" height="20">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -196,7 +195,7 @@ export default function HomePage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-2 w-full bg-[--color-primary] text-white font-bold py-3.5 rounded-xl hover:bg-indigo-600 transition-all shadow-lg shadow-[--color-primary]/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="mt-2 w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 hover:cursor-pointer hover:scale-[1.01] transition-all shadow-lg shadow-[--color-primary]/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
               {mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
@@ -205,10 +204,10 @@ export default function HomePage() {
 
           <div className="mt-8 text-center text-neutral-500 text-sm">
             {mode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-            <button 
-              onClick={switchMode} 
+            <button
+              onClick={switchMode}
               type="button"
-              className="text-[--color-primary] font-bold hover:underline"
+              className="text-[--color-primary] font-bold hover:underline hover:cursor-pointer hover:scale-[1.01] transition-transform"
             >
               {mode === "login" ? "Regístrate gratis" : "Inicia Sesión"}
             </button>

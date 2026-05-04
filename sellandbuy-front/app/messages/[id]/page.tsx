@@ -62,10 +62,20 @@ export default function ChatPage() {
              {/* Chat Header */}
              <div className="bg-white/80 backdrop-blur-md border-b border-neutral-100 p-4 sticky top-0 z-10 flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                   <Link href="/messages" className="md:hidden flex items-center gap-1 p-2 -ml-2 mr-1 hover:bg-neutral-100 rounded-xl transition-colors text-indigo-600 font-medium text-sm">
+                   <button
+                     onClick={() => {
+                       // Use native back if there's history, otherwise navigate to /messages
+                       if (window.history.length > 1) {
+                         router.back();
+                       } else {
+                         router.push("/messages");
+                       }
+                     }}
+                     className="md:hidden flex items-center gap-1 p-2 -ml-2 mr-1 hover:bg-neutral-100 rounded-xl transition-colors text-indigo-600 font-medium text-sm"
+                   >
                      <ArrowLeft size={20} />
                      <span className="hidden sm:inline">Volver</span>
-                   </Link>
+                   </button>
                    
                    {currentConv ? (
                      <div className="flex items-center gap-3 min-w-0 border-l border-neutral-200/60 pl-2 sm:pl-0 sm:border-0">

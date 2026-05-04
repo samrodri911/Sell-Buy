@@ -42,7 +42,7 @@ export default function EditProductPage() {
 
   return (
     <MainLayout hideBottomNav={true}>
-      <ProductForm initialData={product || undefined} />
+      <ProductForm product={product || undefined} />
     </MainLayout>
   );
 }

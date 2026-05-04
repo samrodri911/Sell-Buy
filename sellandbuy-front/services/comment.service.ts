@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase/firestore";
+import { auth } from "@/lib/firebase/auth";
 import { 
   collection, 
   doc, 
@@ -22,6 +23,11 @@ export async function addCommentAndUpdateRatings(
   text: string, 
   rating: number
 ): Promise<void> {
+  // 🔒 Backend guard: only email-verified users can rate/comment
+  const currentUser = auth.currentUser;
+  if (!currentUser?.emailVerified) {
+    throw new Error("EMAIL_NOT_VERIFIED");
+  }
   const commentRef = doc(db, "products", productId, "comments", userId);
   const productRef = doc(db, "products", productId);
   const sellerRef = doc(db, "users", sellerId);

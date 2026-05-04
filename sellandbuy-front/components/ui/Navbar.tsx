@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export type NavTab = "home" | "search" | "sell" | "inbox" | "profile";
 
@@ -15,8 +15,17 @@ export function Navbar({ showSearch = true }: NavbarProps) {
   const { firebaseUser, userProfile } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Sync input with URL on mount/navigation
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    setSearchValue(q);
+  }, [searchParams]);
 
   // Detect scroll for "smart sticky" behavior
   useEffect(() => {
@@ -35,10 +44,30 @@ export function Navbar({ showSearch = true }: NavbarProps) {
 
   const handleSearchClick = () => {
     setSearchExpanded(true);
-    // If not on products page, we might want to redirect
-    if (pathname !== '/products') {
-      router.push('/products');
+    if (pathname !== "/products") {
+      router.push("/products");
     }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+
+    // Debounce: wait 300ms after user stops typing before navigating
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (value.trim()) params.set("q", value.trim());
+      router.push(`/products${value.trim() ? `?${params.toString()}` : ""}`, { scroll: false });
+    }, 300);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const params = new URLSearchParams();
+    if (searchValue.trim()) params.set("q", searchValue.trim());
+    router.push(`/products${searchValue.trim() ? `?${params.toString()}` : ""}`);
   };
 
   return (
@@ -74,20 +103,26 @@ export function Navbar({ showSearch = true }: NavbarProps) {
         {/* Center: Search (Expandable) */}
         {showSearch && (
           <div className={`flex-1 flex justify-center transition-all duration-300 ${searchExpanded ? 'max-w-2xl' : 'max-w-md'}`}>
-            <div 
+            <form
               className="relative w-full group"
-              onClick={handleSearchClick}
+              onSubmit={handleSearchSubmit}
+              role="search"
             >
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-hover:text-[--color-primary] transition-colors">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-hover:text-[--color-primary] transition-colors pointer-events-none">
                 search
               </span>
               <input
                 className="w-full bg-neutral-100/80 border border-neutral-200/50 rounded-full py-2.5 pl-12 pr-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[--color-primary]/30 focus:border-[--color-primary]/30 transition-all shadow-inner"
                 placeholder="Buscar en el marketplace..."
-                type="text"
+                type="search"
+                value={searchValue}
+                onClick={handleSearchClick}
+                onChange={handleSearchChange}
+                onFocus={() => setSearchExpanded(true)}
                 onBlur={() => setSearchExpanded(false)}
+                aria-label="Buscar productos"
               />
-            </div>
+            </form>
           </div>
         )}
 
@@ -106,8 +141,9 @@ export function Navbar({ showSearch = true }: NavbarProps) {
           {isGuest ? (
             <Link
               href="/"
-              className="text-sm font-semibold text-neutral-700 hover:text-[--color-primary] px-3 py-2 rounded-full hover:bg-neutral-100 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:-translate-y-0.5"
             >
+              <span className="material-symbols-outlined text-[18px]">login</span>
               Iniciar Sesión
             </Link>
           ) : (

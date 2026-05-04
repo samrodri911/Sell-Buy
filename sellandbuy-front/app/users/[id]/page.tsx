@@ -8,8 +8,7 @@ import { getUserProfile, updateUserProfile } from "@/lib/services/user.service";
 import { getProducts } from "@/services/product.service";
 import { UserProfile } from "@/types/user";
 import { Product } from "@/types/product";
-import { Navbar } from "@/components/ui/Navbar";
-import { BottomNav } from "@/components/ui/BottomNav";
+import { MainLayout } from "@/components/layout/MainLayout";
 import { SellerInsightsCard } from "@/components/ui/SellerInsightsCard";
 import { ReviewSnippet } from "@/components/ui/ReviewSnippet";
 
@@ -292,19 +291,16 @@ export default function UserProfilePage() {
   // ── Loading state ─────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-[--color-surface]">
-        <Navbar activeTab="profile" />
+      <MainLayout>
         <ProfileSkeleton />
-        <BottomNav activeTab="profile" />
-      </div>
+      </MainLayout>
     );
   }
 
   // ── Error / not found ─────────────────────────────────────────
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-[--color-surface]">
-        <Navbar activeTab="profile" />
+      <MainLayout>
         <div className="max-w-screen-xl mx-auto px-6 pt-24 flex flex-col items-center text-center">
           <div className="w-24 h-24 bg-[--color-error-container] rounded-full flex items-center justify-center mb-6">
             <span className="material-symbols-outlined text-4xl text-[--color-error]">
@@ -324,17 +320,14 @@ export default function UserProfilePage() {
             Explorar productos
           </Link>
         </div>
-        <BottomNav activeTab="profile" />
-      </div>
+      </MainLayout>
     );
   }
 
   // ── Main render ───────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[--color-surface] pb-32">
-      <Navbar activeTab="profile" />
-
-      <main className="max-w-screen-xl mx-auto px-6 pt-8">
+    <MainLayout>
+      <div className="space-y-10 pt-4">
 
         {/* ── Hero Section ── */}
         <section className="mb-12">
@@ -580,9 +573,7 @@ export default function UserProfilePage() {
             )}
           </div>
         </div>
-      </main>
-
-      <BottomNav activeTab="profile" />
-    </div>
+      </div>
+    </MainLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { db } from "@/lib/firebase/firestore";
 import { storage } from "@/lib/firebase/storage";
+import { auth } from "@/lib/firebase/auth";
 import { 
   collection, 
   doc, 
@@ -75,6 +76,12 @@ export async function createProduct(
   userName: string, 
   userPhoto: string | null
 ): Promise<Product> {
+  // 🔒 Backend guard: only verified users can publish products
+  const currentUser = auth.currentUser;
+  if (!currentUser?.emailVerified) {
+    throw new Error("EMAIL_NOT_VERIFIED");
+  }
+
   try {
     const productRef = doc(collection(db, COLLECTION_NAME));
     const productId = productRef.id;
@@ -96,6 +103,8 @@ export async function createProduct(
       rating: 0,
       ratingCount: 0,
       quantity: data.quantity ?? 1,
+      // 🔍 Enables case-insensitive prefix search in Firestore
+      title_lowercase: (data.title ?? "").toLowerCase().trim(),
       createdAt: now,
       updatedAt: now,
     };
@@ -228,6 +237,11 @@ export async function updateProduct(productId: string, data: UpdateProductInput,
       }
     }
 
+    // Keep title_lowercase in sync when title changes
+    if (data.title !== undefined) {
+      finalUpdate.title_lowercase = data.title.toLowerCase().trim();
+    }
+
     await updateDoc(docRef, finalUpdate);
   } catch (error) {
     console.error("Error updating product:", error);
@@ -248,4 +262,31 @@ export async function deleteProduct(productId: string): Promise<void> {
     console.error("Error deleting product:", error);
     throw new Error("Failed to delete product");
   }
+}
+
+/**
+ * Case-insensitive prefix search on product titles.
+ * Uses `title_lowercase` field for Firestore range queries.
+ * Results are limited to active products only.
+ */
+export async function searchProducts(
+  term: string,
+  limitNumber = 20
+): Promise<Product[]> {
+  if (!term.trim()) return [];
+
+  const normalized = term.toLowerCase().trim();
+  // Firestore prefix search: "iphon" matches "iphone", "iphone 14", etc.
+  const end = normalized + "\uf8ff";
+
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where("status", "==", "active"),
+    where("title_lowercase", ">=", normalized),
+    where("title_lowercase", "<=", end),
+    limit(limitNumber)
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => mapDocToProduct(d.id, d.data()));
 }

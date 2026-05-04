@@ -39,6 +39,7 @@ export async function syncUserToFirestore(
     email: firebaseUser.email ?? "",
     displayName: firebaseUser.displayName ?? "",
     photoURL: firebaseUser.photoURL ?? "",
+    isEmailVerified: firebaseUser.emailVerified,
     updatedAt: serverTimestamp(),
   };
 

@@ -4,13 +4,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getProducts } from "@/services/product.service";
-import { Product } from "@/types/product";
+import { Product, ProductStatus } from "@/types/product";
 import { Loader2, PauseCircle, PlayCircle } from "lucide-react";
 import { useProductActions } from "@/hooks/useProducts";
-import { Navbar } from "@/components/ui/Navbar";
-import { BottomNav } from "@/components/ui/BottomNav";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 // ─── All original business logic is unchanged ────────────────────
 export default function DashboardPage() {
@@ -20,6 +19,7 @@ export default function DashboardPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
 
   useEffect(() => {
     if (!authLoading && !firebaseUser) {
@@ -51,9 +51,22 @@ export default function DashboardPage() {
 
   const activeProducts = products.filter((p) => p.status === "active").length;
   const soldProducts   = products.filter((p) => p.status === "sold").length;
-  const estimatedRevenue = products
+
+  // 💰 Real revenue = sum of actually SOLD products
+  const realRevenue = products
     .filter((p) => p.status === "sold")
     .reduce((acc, p) => acc + p.price, 0);
+
+  // 📊 Potential revenue = sum of ACTIVE (listed but not yet sold) products
+  const potentialRevenue = products
+    .filter((p) => p.status === "active")
+    .reduce((acc, p) => acc + p.price, 0);
+
+  // Filtered list for the table (driven by tab)
+  const filteredProducts = useMemo(() => {
+    if (statusFilter === "all") return products;
+    return products.filter((p) => p.status === statusFilter);
+  }, [products, statusFilter]);
 
   const toggleStatus = async (product: Product) => {
     const newStatus = product.status === "active" ? "paused" : "active";
@@ -79,17 +92,19 @@ export default function DashboardPage() {
     );
   }
 
-  const revenueFormatted = new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  }).format(estimatedRevenue);
+  const formatCOP = (amount: number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(amount);
+
+  const revenueFormatted = formatCOP(realRevenue);
+  const potentialFormatted = formatCOP(potentialRevenue);
 
   return (
-    <div className="min-h-screen bg-[--color-surface] pb-32">
-      <Navbar activeTab="profile" />
-
-      <main className="max-w-screen-xl mx-auto px-6 pt-8 pb-8 space-y-10">
+    <MainLayout>
+      <div className="space-y-10 pt-4">
 
         {/* ── Dashboard Header ── */}
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -118,7 +133,7 @@ export default function DashboardPage() {
             </Link>
             <button
               onClick={handleLogout}
-              className="px-5 py-2.5 bg-[--color-error-container] text-[--color-on-error-container] rounded-xl font-medium transition-all hover:opacity-90 flex items-center gap-2"
+              className="px-5 py-2.5 bg-[--color-error-container] text-[--color-on-error-container] rounded-xl font-medium transition-all hover:opacity-90 hover:cursor-pointer hover:scale-[1.01] flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-sm">logout</span>
               Salir
@@ -164,22 +179,19 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Revenue */}
+          {/* Revenue: Real + Potential */}
           <div className="bg-[--color-surface-container-lowest] p-8 rounded-2xl shadow-sm relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-[--color-tertiary-fixed]/30 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
-            <p className="text-[--color-on-surface-variant] font-medium text-sm">Ingresos estimados</p>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-[--color-on-surface]">{revenueFormatted}</span>
-            </div>
-            <div className="mt-6 flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`w-6 h-6 rounded-full border-2 border-white bg-slate-${200 + i * 100}`} />
-                ))}
+            <p className="text-[--color-on-surface-variant] font-medium text-sm">Ingresos</p>
+            <div className="mt-4 space-y-3">
+              <div>
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">💰 Reales (vendidos)</p>
+                <span className="text-2xl font-bold text-[--color-on-surface]">{revenueFormatted}</span>
               </div>
-              <span className="text-xs text-[--color-on-surface-variant] font-medium">
-                Basado en ventas registradas
-              </span>
+              <div>
+                <p className="text-[10px] font-bold text-[--color-on-surface-variant] uppercase tracking-wider">📊 Potenciales (activos)</p>
+                <span className="text-lg font-semibold text-[--color-on-surface-variant]">{potentialFormatted}</span>
+              </div>
             </div>
           </div>
         </section>
@@ -188,12 +200,28 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold tracking-tight text-[--color-on-surface]">Mis anuncios</h2>
-            <Link
-              href="/products/create"
-              className="text-[--color-primary] font-bold text-sm hover:underline"
-            >
-              Ver todos
-            </Link>
+          </div>
+
+          {/* Status Filter Tabs */}
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+            {([
+              { key: "all",    label: "Todos",   count: products.length },
+              { key: "active", label: "Activos", count: activeProducts },
+              { key: "sold",   label: "Vendidos", count: soldProducts },
+              { key: "paused", label: "Pausados", count: products.filter(p => p.status === "paused").length },
+            ] as const).map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  statusFilter === key
+                    ? "bg-[--color-primary] text-[--color-on-primary] shadow-sm"
+                    : "bg-[--color-surface-container] text-[--color-on-surface-variant] hover:bg-[--color-surface-container-high]"
+                }`}
+              >
+                {label} <span className="opacity-70">({count})</span>
+              </button>
+            ))}
           </div>
 
           {loading ? (
@@ -208,20 +236,24 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-[--color-surface-container-lowest] rounded-2xl text-center">
-              <span className="material-symbols-outlined text-5xl text-[--color-outline] mb-4">inventory_2</span>
-              <p className="text-[--color-on-surface-variant] font-medium text-lg">Aún no tienes productos publicados</p>
-              <Link
-                href="/products/create"
-                className="mt-6 px-6 py-2.5 bg-[--color-primary] text-[--color-on-primary] rounded-2xl font-bold shadow-lg shadow-[--color-primary]/20 hover:opacity-90 transition-all"
-              >
-                Publicar primer anuncio
-              </Link>
+              <span className="material-symbols-outlined text-5xl text-[--color-outline] mb-4">filter_list_off</span>
+              <p className="text-[--color-on-surface-variant] font-medium text-lg">
+                {statusFilter === "all" ? "Aún no tienes productos publicados" : `No tienes productos ${statusFilter === 'active' ? 'activos' : statusFilter === 'sold' ? 'vendidos' : 'pausados'}`}
+              </p>
+              {statusFilter === "all" && (
+                <Link
+                  href="/products/create"
+                  className="mt-6 px-6 py-2.5 bg-[--color-primary] text-[--color-on-primary] rounded-2xl font-bold shadow-lg shadow-[--color-primary]/20 hover:opacity-90 transition-all"
+                >
+                  Publicar primer anuncio
+                </Link>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
-              {products.map((product) => {
+              {filteredProducts.map((product) => {
                 const price = new Intl.NumberFormat("es-CO", {
                   style: "currency",
                   currency: product.currency,
@@ -325,9 +357,7 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
-      </main>
-
-      <BottomNav activeTab="profile" />
-    </div>
+      </div>
+    </MainLayout>
   );
 }

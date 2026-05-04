@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getProducts } from '@/services/product.service';
+import { getProducts, searchProducts } from '@/services/product.service';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Product } from '@/types/product';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -24,6 +24,8 @@ export default function ProductsPage() {
   // Persist state via URL
   const currentCategory = searchParams.get('category') || '';
   const currentSort = searchParams.get('sort') || 'recent';
+  const searchQuery = searchParams.get('q') || '';
+  const isSearchMode = searchQuery.trim().length > 0;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,31 +47,36 @@ export default function ProductsPage() {
       setLoading(true);
       setError(null);
       try {
-        const queryOpts = currentCategory ? { category: currentCategory } : {};
-        const result = await getProducts(queryOpts);
-        
-        // Helper robusto para obtener milisegundos de cualquier formato de fecha
-        const getMillis = (date: any) => {
-          if (!date) return 0;
-          if (typeof date.toMillis === 'function') return date.toMillis();
-          if (date.seconds) return date.seconds * 1000;
-          if (date instanceof Date) return date.getTime();
-          if (typeof date === 'string') return new Date(date).getTime();
-          if (typeof date === 'number') return date;
-          return 0;
-        };
+        let sortedProducts: Product[];
 
-        // Client-side sorting as a temporary measure if Firebase indices aren't fully set
-        let sortedProducts = [...result.products];
-        if (currentSort === 'price_asc') {
-          sortedProducts.sort((a, b) => a.price - b.price);
-        } else if (currentSort === 'price_desc') {
-          sortedProducts.sort((a, b) => b.price - a.price);
+        if (isSearchMode) {
+          // 🔍 Search mode: use title_lowercase prefix search
+          sortedProducts = await searchProducts(searchQuery);
         } else {
-          // 'recent'
-          sortedProducts.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
+          const queryOpts = currentCategory ? { category: currentCategory } : {};
+          const result = await getProducts(queryOpts);
+
+          // Helper robusto para obtener milisegundos de cualquier formato de fecha
+          const getMillis = (date: any) => {
+            if (!date) return 0;
+            if (typeof date.toMillis === 'function') return date.toMillis();
+            if (date.seconds) return date.seconds * 1000;
+            if (date instanceof Date) return date.getTime();
+            if (typeof date === 'string') return new Date(date).getTime();
+            if (typeof date === 'number') return date;
+            return 0;
+          };
+
+          sortedProducts = [...result.products];
+          if (currentSort === 'price_asc') {
+            sortedProducts.sort((a, b) => a.price - b.price);
+          } else if (currentSort === 'price_desc') {
+            sortedProducts.sort((a, b) => b.price - a.price);
+          } else {
+            sortedProducts.sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
+          }
         }
-        
+
         setProducts(sortedProducts);
       } catch (err: any) {
         console.error(err);
@@ -83,7 +90,7 @@ export default function ProductsPage() {
       }
     }
     loadProducts();
-  }, [currentCategory, currentSort]);
+  }, [currentCategory, currentSort, searchQuery, isSearchMode]);
 
   return (
     <MainLayout>
@@ -93,45 +100,62 @@ export default function ProductsPage() {
         <div className="flex flex-col gap-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
-                Descubre
-              </h1>
-              <p className="text-neutral-500 mt-1 text-sm md:text-base">
-                Encuentra exactamente lo que estás buscando
-              </p>
+              {isSearchMode ? (
+                <>
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
+                    Resultados
+                  </h1>
+                  <p className="text-neutral-500 mt-1 text-sm md:text-base">
+                    Buscando: <span className="font-semibold text-neutral-700">&ldquo;{searchQuery}&rdquo;</span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
+                    Descubre
+                  </h1>
+                  <p className="text-neutral-500 mt-1 text-sm md:text-base">
+                    Encuentra exactamente lo que estás buscando
+                  </p>
+                </>
+              )}
             </div>
-            
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-neutral-500 hidden sm:inline">Ordenar por:</span>
-              <select 
-                value={currentSort}
-                onChange={(e) => updateQuery('sort', e.target.value)}
-                className="bg-white border border-neutral-200/80 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-neutral-300 transition-colors shadow-sm outline-none appearance-none cursor-pointer"
-              >
-                <option value="recent">Más recientes</option>
-                <option value="price_asc">Menor precio</option>
-                <option value="price_desc">Mayor precio</option>
-              </select>
-            </div>
+
+            {/* Sort Dropdown: Only show when not in search mode */}
+            {!isSearchMode && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-neutral-500 hidden sm:inline">Ordenar por:</span>
+                <select 
+                  value={currentSort}
+                  onChange={(e) => updateQuery('sort', e.target.value)}
+                  className="bg-white border border-neutral-200/80 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-neutral-300 transition-colors shadow-sm outline-none appearance-none cursor-pointer"
+                >
+                  <option value="recent">Más recientes</option>
+                  <option value="price_asc">Menor precio</option>
+                  <option value="price_desc">Mayor precio</option>
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* Category Chips (Horizontal Scroll) */}
-          <div className="flex overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-2 hide-scrollbar">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id || 'all'}
-                onClick={() => updateQuery('category', cat.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  currentCategory === cat.id 
-                    ? 'bg-neutral-900 text-white shadow-md' 
-                    : 'bg-white border border-neutral-200/80 text-neutral-600 hover:bg-neutral-50'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          {/* Category Chips: hidden in search mode */}
+          {!isSearchMode && (
+            <div className="flex overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-2 hide-scrollbar">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id || 'all'}
+                  onClick={() => updateQuery('category', cat.id)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    currentCategory === cat.id 
+                      ? 'bg-neutral-900 text-white shadow-md' 
+                      : 'bg-white border border-neutral-200/80 text-neutral-600 hover:bg-neutral-50'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Content Grid */}
@@ -154,13 +178,30 @@ export default function ProductsPage() {
               ))
             ) : (
               <div className="col-span-full flex flex-col items-center justify-center py-24 bg-neutral-50/50 rounded-3xl border border-dashed border-neutral-200">
-                <span className="material-symbols-outlined text-neutral-300 text-6xl mb-4">search_off</span>
-                <p className="text-neutral-500 font-medium text-lg">No encontramos productos</p>
-                <p className="text-neutral-400 text-sm mt-1">Prueba quitando algunos filtros</p>
-                {currentCategory && (
-                  <button onClick={() => updateQuery('category', '')} className="mt-4 text-[--color-primary] font-medium hover:underline text-sm">
-                    Ver todos los productos
-                  </button>
+                <span className="material-symbols-outlined text-neutral-300 text-6xl mb-4">
+                  {isSearchMode ? 'manage_search' : 'search_off'}
+                </span>
+                {isSearchMode ? (
+                  <>
+                    <p className="text-neutral-500 font-medium text-lg">Sin resultados para &ldquo;{searchQuery}&rdquo;</p>
+                    <p className="text-neutral-400 text-sm mt-1">Intenta con otro término de búsqueda</p>
+                    <button
+                      onClick={() => router.push('/products')}
+                      className="mt-4 text-[--color-primary] font-medium hover:underline text-sm"
+                    >
+                      Ver todos los productos
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-neutral-500 font-medium text-lg">No encontramos productos</p>
+                    <p className="text-neutral-400 text-sm mt-1">Prueba quitando algunos filtros</p>
+                    {currentCategory && (
+                      <button onClick={() => updateQuery('category', '')} className="mt-4 text-[--color-primary] font-medium hover:underline text-sm">
+                        Ver todos los productos
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             )}

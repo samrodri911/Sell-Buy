@@ -15,6 +15,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   signOut,
+  sendEmailVerification,
   type User as FirebaseUser,
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase/auth";
@@ -40,9 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
-          setFirebaseUser(user);
-          // Sync to Firestore and get full profile
-          const profile = await syncUserToFirestore(user);
+          // 🔑 Force reload so emailVerified reflects latest state
+          // (e.g., user verified their email in another tab / session)
+          await user.reload();
+          // After reload, auth.currentUser has the freshest token data.
+          // We use the reloaded user from auth.currentUser for accuracy.
+          const freshUser = auth.currentUser ?? user;
+          setFirebaseUser(freshUser);
+          // Sync to Firestore (including isEmailVerified)
+          const profile = await syncUserToFirestore(freshUser);
           setUserProfile(profile);
         } else {
           setFirebaseUser(null);
@@ -113,6 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         // Set the display name on the Firebase Auth profile
         await updateProfile(result.user, { displayName });
+        // Send email verification immediately after registration
+        await sendEmailVerification(result.user);
         // Force a re-sync so Firestore gets the displayName
         await syncUserToFirestore(result.user);
         const profile = await getUserProfile(result.user.uid, true);
@@ -142,6 +151,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // ── Send email verification ──
+  const sendVerificationEmail = useCallback(async () => {
+    if (!firebaseUser) return;
+    try {
+      await sendEmailVerification(firebaseUser);
+    } catch (err) {
+      console.error("[Auth] Send verification email error:", err);
+      throw err;
+    }
+  }, [firebaseUser]);
+
   // ── Refresh profile from Firestore ──
   const refreshProfile = useCallback(async () => {
     if (!firebaseUser) return;
@@ -167,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginWithEmail,
       signUpWithEmail,
       logout,
+      sendVerificationEmail,
       refreshProfile,
       clearError,
     }),
@@ -179,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginWithEmail,
       signUpWithEmail,
       logout,
+      sendVerificationEmail,
       refreshProfile,
       clearError,
     ]

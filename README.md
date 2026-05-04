@@ -230,12 +230,6 @@ La plataforma incluye un asistente de IA para vendedores:
 
 ---
 
-## Licencia
-
-Este proyecto está bajo licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
----
-
 ## Seguridad
 
 - **Variables sensibles**: Todas las API keys están en `.env.local` (nunca commitear)
