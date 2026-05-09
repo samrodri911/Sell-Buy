@@ -17,7 +17,7 @@ const CATEGORIES = [
   { id: 'Other', label: 'Otros' }
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -209,5 +209,19 @@ export default function ProductsPage() {
         )}
       </div>
     </MainLayout>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <React.Suspense fallback={
+      <MainLayout>
+        <div className="flex flex-col gap-8 pt-4">
+          <SkeletonList count={10} />
+        </div>
+      </MainLayout>
+    }>
+      <ProductsContent />
+    </React.Suspense>
   );
 }

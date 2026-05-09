@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Navbar } from '../ui/Navbar';
 import { BottomNav } from '../ui/BottomNav';
 import { EmailVerificationBanner } from '../ui/EmailVerificationBanner';
@@ -22,7 +22,11 @@ export function MainLayout({
 }: MainLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen bg-[--color-surface]">
-      {!hideNavbar && <Navbar showSearch={showSearch} />}
+      {!hideNavbar && (
+        <Suspense fallback={<div className="h-[72px] w-full bg-white/80 border-b border-black/5" />}>
+          <Navbar showSearch={showSearch} />
+        </Suspense>
+      )}
       <EmailVerificationBanner />
 
       {/* Main content area with consistent max-width and padding */}
