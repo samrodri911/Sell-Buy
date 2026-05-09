@@ -265,28 +265,40 @@ export async function deleteProduct(productId: string): Promise<void> {
 }
 
 /**
- * Case-insensitive prefix search on product titles.
- * Uses `title_lowercase` field for Firestore range queries.
- * Results are limited to active products only.
+ * Case-insensitive substring search on product titles and descriptions.
+ * Fetches recent active products and filters in memory to support
+ * matching any part of the text (Firebase limitation workaround).
  */
 export async function searchProducts(
   term: string,
-  limitNumber = 20
+  limitNumber = 50
 ): Promise<Product[]> {
   if (!term.trim()) return [];
 
-  const normalized = term.toLowerCase().trim();
-  // Firestore prefix search: "iphon" matches "iphone", "iphone 14", etc.
-  const end = normalized + "\uf8ff";
+  const normalizedTerms = term.toLowerCase().trim().split(/\s+/);
 
+  // Firestore no soporta búsquedas por substring (LIKE %term%) de forma nativa.
+  // Para lograr que busque "por cada letra" (substring) en cualquier parte del texto, 
+  // obtenemos los productos activos más recientes y los filtramos en memoria.
   const q = query(
     collection(db, COLLECTION_NAME),
     where("status", "==", "active"),
-    where("title_lowercase", ">=", normalized),
-    where("title_lowercase", "<=", end),
-    limit(limitNumber)
+    orderBy("createdAt", "desc"),
+    limit(200) // Espacio de búsqueda: los 200 productos activos más recientes
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => mapDocToProduct(d.id, d.data()));
+  const products = snapshot.docs.map((d) => mapDocToProduct(d.id, d.data()));
+
+  const filtered = products.filter((p) => {
+    const title = (p.title || "").toLowerCase();
+    const desc = (p.description || "").toLowerCase();
+    
+    // El producto debe coincidir con todos los términos de búsqueda tipeados
+    return normalizedTerms.every(
+      word => title.includes(word) || desc.includes(word)
+    );
+  });
+
+  return filtered.slice(0, limitNumber);
 }
