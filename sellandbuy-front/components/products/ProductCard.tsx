@@ -1,14 +1,37 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "../../types/product";
+import { useFavorites } from "@/hooks/useFavorites";
+import { copyProductLink } from "@/lib/share";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { toggleFavorite, isFavorite, isLoading: isFavLoading } = useFavorites();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const isFav = isFavorite(product.id);
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const success = await copyProductLink(product.id);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleFavorite(product.id);
+  };
+
   const imageUrl =
     product.images.length > 0
       ? product.images[0]
@@ -40,14 +63,36 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Wishlist button */}
-        <button
-          className="absolute top-3 right-3 h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-error] transition-colors opacity-0 group-hover:opacity-100"
-          onClick={(e) => e.preventDefault()}
-          aria-label="Guardar en favoritos"
-        >
-          <span className="material-symbols-outlined text-[20px]">favorite</span>
-        </button>
+        {/* Actions container (top-right) */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Wishlist button */}
+          <button
+            className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-error] transition-colors disabled:opacity-50"
+            onClick={handleFavorite}
+            disabled={isFavLoading}
+            aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+          >
+            <span className={`material-symbols-outlined text-[20px] ${isFav ? 'text-[--color-error] font-variation-fill' : ''}`}>
+              favorite
+            </span>
+          </button>
+
+          {/* Share button */}
+          <button
+            className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-primary] transition-colors relative"
+            onClick={handleShare}
+            aria-label="Compartir"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {isCopied ? "check" : "share"}
+            </span>
+            {isCopied && (
+              <div className="absolute right-12 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                Enlace copiado
+              </div>
+            )}
+          </button>
+        </div>
 
         {/* Condition badge bottom-left */}
         <div className="absolute bottom-3 left-3 flex gap-2">

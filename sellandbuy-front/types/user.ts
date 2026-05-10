@@ -22,6 +22,7 @@ export interface UserProfile {
   sellerRatingCount: number;
   buyerRating: number;
   buyerRatingCount: number;
+  favoriteProducts?: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -60,6 +61,8 @@ export interface AuthActions {
   refreshProfile: () => Promise<void>;
   /** Clear the error state */
   clearError: () => void;
+  /** Optimistic update for profile */
+  updateLocalProfile: (partialProfile: Partial<UserProfile>) => void;
 }
 
 export type AuthContextValue = AuthState & AuthActions;

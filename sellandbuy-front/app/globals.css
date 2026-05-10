@@ -3,73 +3,73 @@
 /* ── Design System Tokens (Material Design 3 + Reference Design) ── */
 @theme inline {
   /* Surfaces */
-  --color-surface:                   #f8f9ff;
-  --color-surface-dim:               #ccdbf3;
-  --color-surface-bright:            #f8f9ff;
-  --color-surface-container-lowest:  #ffffff;
-  --color-surface-container-low:     #eff4ff;
-  --color-surface-container:         #e6eeff;
-  --color-surface-container-high:    #dce9ff;
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #ccdbf3;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e6eeff;
+  --color-surface-container-high: #dce9ff;
   --color-surface-container-highest: #d5e3fc;
-  --color-surface-variant:           #d5e3fc;
-  --color-surface-tint:              #0053db;
+  --color-surface-variant: #d5e3fc;
+  --color-surface-tint: #0053db;
 
   /* Primary */
-  --color-primary:                   #004ac6;
-  --color-on-primary:                #ffffff;
-  --color-primary-container:         #2563eb;
-  --color-on-primary-container:      #eeefff;
-  --color-primary-fixed:             #dbe1ff;
-  --color-primary-fixed-dim:         #b4c5ff;
-  --color-on-primary-fixed:          #00174b;
-  --color-on-primary-fixed-variant:  #003ea8;
-  --color-inverse-primary:           #b4c5ff;
+  --color-primary: #004ac6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2563eb;
+  --color-on-primary-container: #eeefff;
+  --color-primary-fixed: #dbe1ff;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-on-primary-fixed: #00174b;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-inverse-primary: #b4c5ff;
 
   /* Secondary */
-  --color-secondary:                 #495c95;
-  --color-on-secondary:              #ffffff;
-  --color-secondary-container:       #acbfff;
-  --color-on-secondary-container:    #394c84;
-  --color-secondary-fixed:           #dbe1ff;
-  --color-secondary-fixed-dim:       #b4c5ff;
-  --color-on-secondary-fixed:        #00174b;
-  --color-on-secondary-fixed-variant:#31447b;
+  --color-secondary: #495c95;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #acbfff;
+  --color-on-secondary-container: #394c84;
+  --color-secondary-fixed: #dbe1ff;
+  --color-secondary-fixed-dim: #b4c5ff;
+  --color-on-secondary-fixed: #00174b;
+  --color-on-secondary-fixed-variant: #31447b;
 
   /* Tertiary */
-  --color-tertiary:                  #943700;
-  --color-on-tertiary:               #ffffff;
-  --color-tertiary-container:        #bc4800;
-  --color-on-tertiary-container:     #ffede6;
-  --color-tertiary-fixed:            #ffdbcd;
-  --color-tertiary-fixed-dim:        #ffb596;
-  --color-on-tertiary-fixed:         #360f00;
+  --color-tertiary: #943700;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #bc4800;
+  --color-on-tertiary-container: #ffede6;
+  --color-tertiary-fixed: #ffdbcd;
+  --color-tertiary-fixed-dim: #ffb596;
+  --color-on-tertiary-fixed: #360f00;
   --color-on-tertiary-fixed-variant: #7d2d00;
 
   /* On Surfaces */
-  --color-background:                #f8f9ff;
-  --color-on-background:             #0d1c2e;
-  --color-on-surface:                #0d1c2e;
-  --color-on-surface-variant:        #434655;
-  --color-inverse-surface:           #233144;
-  --color-inverse-on-surface:        #eaf1ff;
+  --color-background: #f8f9ff;
+  --color-on-background: #0d1c2e;
+  --color-on-surface: #0d1c2e;
+  --color-on-surface-variant: #434655;
+  --color-inverse-surface: #233144;
+  --color-inverse-on-surface: #eaf1ff;
 
   /* Outline */
-  --color-outline:                   #737686;
-  --color-outline-variant:           #c3c6d7;
+  --color-outline: #737686;
+  --color-outline-variant: #c3c6d7;
 
   /* Error */
-  --color-error:                     #ba1a1a;
-  --color-on-error:                  #ffffff;
-  --color-error-container:           #ffdad6;
-  --color-on-error-container:        #93000a;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 
   /* Border radius */
-  --radius-sm:   0.25rem;
-  --radius:      0.375rem;
-  --radius-lg:   0.5rem;
-  --radius-xl:   0.75rem;
-  --radius-2xl:  1rem;
-  --radius-3xl:  1.5rem;
+  --radius-sm: 0.25rem;
+  --radius: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
   /* Typography */
@@ -77,7 +77,9 @@
 }
 
 /* ── Base Styles ── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -107,28 +109,198 @@ body {
 }
 
 /* ── Utilities ── */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 /* ── Spinner (keep for backward compat) ── */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Skeleton shimmer ── */
 @keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--color-surface-container-high) 25%,
-    var(--color-surface-container-highest) 50%,
-    var(--color-surface-container-high) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-surface-container-high) 25%,
+      var(--color-surface-container-highest) 50%,
+      var(--color-surface-container-high) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-xl);
+}
+
+/* ── Global Interactive Elements ── */
+button,
+a,
+[role="button"],
+[tabindex="0"] {
+  cursor: pointer;
+}
+
+/* ── Floating animation ── */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+/* ── Phone subtle rock ── */
+@keyframes phone-rock {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-16px) rotate(1deg);
+  }
+}
+
+/* ── Pulse glow for blobs ── */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
+/* ── Ring pulse ── */
+@keyframes ring-pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1) rotateX(70deg);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04) rotateX(70deg);
+  }
+}
+
+/* ── Orbit — element revolves around a centre point ── */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(130px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(130px) rotate(-360deg);
+  }
+}
+
+@keyframes orbit-reverse {
+  from {
+    transform: rotate(0deg) translateX(110px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg) translateX(110px) rotate(360deg);
+  }
+}
+
+@keyframes orbit-small {
+  from {
+    transform: rotate(0deg) translateX(155px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(155px) rotate(-360deg);
+  }
+}
+
+/* ── Spin very slowly ── */
+@keyframes spin-slow {
+  from {
+    transform: rotateX(70deg) rotate(0deg);
+  }
+
+  to {
+    transform: rotateX(70deg) rotate(360deg);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-phone-rock {
+  animation: phone-rock 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-orbit {
+  animation: orbit 8s linear infinite;
+}
+
+.animate-orbit-rev {
+  animation: orbit-reverse 11s linear infinite;
+}
+
+.animate-orbit-small {
+  animation: orbit-small 14s linear infinite;
+}
+
+.animate-ring-pulse {
+  animation: ring-pulse 3s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+/* ── Font variation fill for Material Symbols ── */
+.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }

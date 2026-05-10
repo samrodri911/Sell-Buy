@@ -173,8 +173,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [firebaseUser]);
 
-  // ── Clear error ──
+  // ── Clear Error ──
   const clearError = useCallback(() => setError(null), []);
+
+  // ── Optimistic Update for Profile ──
+  const updateLocalProfile = useCallback((partialProfile: Partial<UserProfile>) => {
+    setUserProfile((prev) => (prev ? { ...prev, ...partialProfile } : null));
+  }, []);
 
   // ── Memoize context value to prevent unnecessary re-renders ──
   const value = useMemo<AuthContextValue>(
@@ -190,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendVerificationEmail,
       refreshProfile,
       clearError,
+      updateLocalProfile,
     }),
     [
       firebaseUser,
@@ -203,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendVerificationEmail,
       refreshProfile,
       clearError,
+      updateLocalProfile,
     ]
   );
 

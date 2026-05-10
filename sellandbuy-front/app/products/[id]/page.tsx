@@ -9,6 +9,8 @@ import { ContactSellerButton } from '@/components/chat/ContactSellerButton';
 import { ProductComments } from '@/components/products/ProductComments';
 import { useAuth } from '@/hooks/useAuth';
 import { useProductActions } from '@/hooks/useProducts';
+import { useFavorites } from '@/hooks/useFavorites';
+import { copyProductLink } from '@/lib/share';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -18,9 +20,11 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const { firebaseUser } = useAuth();
   const { editProduct } = useProductActions();
+  const { toggleFavorite, isFavorite, isLoading: isFavLoading } = useFavorites();
 
   useEffect(() => {
     async function loadProduct() {
@@ -38,6 +42,20 @@ export default function ProductDetailPage() {
     }
     if (id) loadProduct();
   }, [id]);
+
+  const handleShare = async () => {
+    const success = await copyProductLink(id);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleFavorite = async () => {
+    await toggleFavorite(id);
+  };
+
+  const isFav = isFavorite(id);
 
   if (loading) {
     return (
@@ -152,12 +170,30 @@ export default function ProductDetailPage() {
                 <span className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
                   {product.condition === 'new' ? 'Nuevo' : 'Usado'} {product.quantity ? `· ${product.quantity} disponibles` : ''}
                 </span>
-                <div className="flex gap-1 text-neutral-400">
-                  <button className="p-2 hover:bg-neutral-100 rounded-full transition-colors" aria-label="Compartir">
-                    <span className="material-symbols-outlined text-[22px]">share</span>
+                <div className="flex gap-1 text-neutral-400 relative">
+                  <button 
+                    onClick={handleShare}
+                    className={`p-2 hover:bg-neutral-100 rounded-full transition-colors ${isCopied ? 'text-[--color-primary]' : ''}`} 
+                    aria-label="Compartir"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">
+                      {isCopied ? "check" : "share"}
+                    </span>
                   </button>
-                  <button className="p-2 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors" aria-label="Guardar favorito">
-                    <span className="material-symbols-outlined text-[22px]">favorite</span>
+                  {isCopied && (
+                    <div className="absolute top-10 right-10 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg z-10">
+                      Enlace copiado
+                    </div>
+                  )}
+                  <button 
+                    onClick={handleFavorite}
+                    disabled={isFavLoading}
+                    className={`p-2 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors disabled:opacity-50 ${isFav ? 'text-red-500' : ''}`} 
+                    aria-label={isFav ? "Quitar de favorito" : "Guardar favorito"}
+                  >
+                    <span className={`material-symbols-outlined text-[22px] ${isFav ? 'font-variation-fill' : ''}`}>
+                      favorite
+                    </span>
                   </button>
                 </div>
               </div>
