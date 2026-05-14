@@ -66,20 +66,20 @@ export function ProductComments({ productId, sellerId }: ProductCommentsProps) {
   const hasCommented = comments.some(c => c.userId === firebaseUser?.uid);
 
   return (
-    <div className="bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm">
-      <h3 className="text-xl font-bold text-neutral-900 mb-6">Comentarios y Reseñas</h3>
+    <div className="bg-[var(--color-surface)] rounded-3xl border border-[var(--color-outline-variant)] p-8 shadow-sm">
+      <h3 className="text-xl font-bold text-[var(--color-on-surface)] mb-6">Comentarios y Reseñas</h3>
 
       {/* Review Form - Only if logged in, not the seller, and hasn't commented yet */}
       {firebaseUser && firebaseUser.uid !== sellerId && !hasCommented && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-          <h4 className="font-semibold text-neutral-800 mb-3">Establecer calificación</h4>
+        <form onSubmit={handleSubmit} className="mb-8 bg-[var(--color-surface-container)] p-6 rounded-2xl border border-[var(--color-outline-variant)]">
+          <h4 className="font-semibold text-[var(--color-on-surface)] mb-3">Establecer calificación</h4>
           <div className="flex gap-2 mb-4">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
                 onClick={() => setNewRating(star)}
-                className={`transition-colors ${newRating >= star ? 'text-amber-400' : 'text-neutral-300'}`}
+                className={`transition-colors ${newRating >= star ? 'text-amber-400' : 'text-[var(--color-outline)]'}`}
               >
                 <Star fill={newRating >= star ? "currentColor" : "none"} size={32} />
               </button>
@@ -90,7 +90,7 @@ export function ProductComments({ productId, sellerId }: ProductCommentsProps) {
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
             placeholder="¿Qué te pareció este producto?"
-            className="w-full p-4 bg-white border border-neutral-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none mb-3"
+            className="w-full p-4 bg-[var(--color-surface-container-highest)] border border-[var(--color-outline-variant)] rounded-xl focus:ring-2 focus:ring-amber-500 outline-none resize-none mb-3 text-[var(--color-on-surface)] placeholder-[var(--color-outline)]"
             rows={3}
             required
           />
@@ -100,7 +100,7 @@ export function ProductComments({ productId, sellerId }: ProductCommentsProps) {
           <button
             type="submit"
             disabled={isSubmitting || newText.trim().length === 0}
-            className="flex items-center justify-center gap-2 bg-neutral-900 hover:bg-black text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-[var(--color-inverse-surface)] hover:opacity-90 text-[var(--color-inverse-on-surface)] font-bold py-3 px-6 rounded-xl transition-opacity disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             Enviar Reseña
@@ -113,32 +113,32 @@ export function ProductComments({ productId, sellerId }: ProductCommentsProps) {
         {loading ? (
           <Loader2 size={24} className="animate-spin text-amber-500 mx-auto" />
         ) : comments.length === 0 ? (
-          <p className="text-neutral-500 text-center py-4">Aún no hay reseñas para este producto. ¡Sé el primero!</p>
+          <p className="text-[var(--color-on-surface-variant)] text-center py-4">Aún no hay reseñas para este producto. ¡Sé el primero!</p>
         ) : (
           comments.map((comment) => (
-            <div key={comment.id} className="flex gap-4 border-b border-neutral-100 pb-6 last:border-0 last:pb-0">
+            <div key={comment.id} className="flex gap-4 border-b border-[var(--color-outline-variant)] pb-6 last:border-0 last:pb-0">
               <div className="flex-shrink-0">
                 {comment.userPhoto ? (
                   <img src={comment.userPhoto} alt={comment.userName} className="w-12 h-12 rounded-full object-cover" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                  <div className="w-12 h-12 rounded-full bg-[var(--color-primary-container)] flex items-center justify-center text-[var(--color-on-primary-container)] font-bold">
                     {comment.userName.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-1">
-                  <span className="font-bold text-neutral-800">{comment.userName}</span>
+                  <span className="font-bold text-[var(--color-on-surface)]">{comment.userName}</span>
                   <div className="flex text-amber-400">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star key={s} size={14} fill={comment.rating >= s ? "currentColor" : "none"} />
                     ))}
                   </div>
                 </div>
-                <div className="text-sm text-neutral-400 mb-2">
+                <div className="text-sm text-[var(--color-outline)] mb-2">
                   {comment.createdAt?.toDate ? comment.createdAt.toDate().toLocaleDateString('es-CO') : 'Reciente'}
                 </div>
-                <p className="text-neutral-600 leading-relaxed text-sm">
+                <p className="text-[var(--color-on-surface-variant)] leading-relaxed text-sm">
                   {comment.text}
                 </p>
               </div>
