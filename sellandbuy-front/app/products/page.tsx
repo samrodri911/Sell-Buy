@@ -102,19 +102,19 @@ function ProductsContent() {
             <div>
               {isSearchMode ? (
                 <>
-                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[var(--color-on-surface)]">
                     Resultados
                   </h1>
-                  <p className="text-neutral-500 mt-1 text-sm md:text-base">
-                    Buscando: <span className="font-semibold text-neutral-700">&ldquo;{searchQuery}&rdquo;</span>
+                  <p className="text-[var(--color-on-surface-variant)] mt-1 text-sm md:text-base">
+                    Buscando: <span className="font-semibold text-[var(--color-on-surface)]">&ldquo;{searchQuery}&rdquo;</span>
                   </p>
                 </>
               ) : (
                 <>
-                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-neutral-900">
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[var(--color-on-surface)]">
                     Descubre
                   </h1>
-                  <p className="text-neutral-500 mt-1 text-sm md:text-base">
+                  <p className="text-[var(--color-on-surface-variant)] mt-1 text-sm md:text-base">
                     Encuentra exactamente lo que estás buscando
                   </p>
                 </>
@@ -124,11 +124,11 @@ function ProductsContent() {
             {/* Sort Dropdown: Only show when not in search mode */}
             {!isSearchMode && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-neutral-500 hidden sm:inline ">Ordenar por:</span>
+                <span className="text-sm font-medium text-[var(--color-on-surface-variant)] hidden sm:inline ">Ordenar por:</span>
                 <select 
                   value={currentSort}
                   onChange={(e) => updateQuery('sort', e.target.value)}
-                  className="bg-white border border-neutral-200/80 text-neutral-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-neutral-300 transition-colors shadow-sm outline-none appearance-none cursor-pointer"
+                  className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)] text-[var(--color-on-surface)] px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-[var(--color-outline)] transition-colors shadow-sm outline-none appearance-none cursor-pointer"
                 > 
                   <option value="recent">Más recientes</option>
                   <option value="price_asc">Menor precio</option>
@@ -147,8 +147,8 @@ function ProductsContent() {
                   onClick={() => updateQuery('category', cat.id)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                     currentCategory === cat.id 
-                      ? 'bg-neutral-900 text-white shadow-md' 
-                      : 'bg-white border border-neutral-200/80 text-neutral-600 hover:bg-neutral-50'
+                      ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md' 
+                      : 'bg-[var(--color-surface)] border border-[var(--color-outline-variant)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)]'
                   }`}
                 >
                   {cat.label}
@@ -160,11 +160,11 @@ function ProductsContent() {
 
         {/* Content Grid */}
         {error ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-red-50/50 rounded-3xl border border-red-100">
-            <span className="material-symbols-outlined text-red-400 text-5xl mb-3">error</span>
-            <p className="text-red-800 font-semibold text-lg">Error al cargar</p>
-            <p className="text-red-500 text-sm max-w-md text-center mt-1">{error}</p>
-            <button onClick={() => window.location.reload()} className="mt-6 text-red-600 font-medium hover:underline text-sm">
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-error-container)] rounded-3xl border border-[var(--color-error)]/20">
+            <span className="material-symbols-outlined text-[var(--color-error)] text-5xl mb-3">error</span>
+            <p className="text-[var(--color-on-error-container)] font-semibold text-lg">Error al cargar</p>
+            <p className="text-[var(--color-on-error-container)]/80 text-sm max-w-md text-center mt-1">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-6 text-[var(--color-error)] font-medium hover:underline text-sm">
               Intentar nuevamente
             </button>
           </div>
@@ -177,14 +177,14 @@ function ProductsContent() {
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
-              <div className="col-span-full flex flex-col items-center justify-center py-24 bg-neutral-50/50 rounded-3xl border border-dashed border-neutral-200">
-                <span className="material-symbols-outlined text-neutral-300 text-6xl mb-4">
+              <div className="col-span-full flex flex-col items-center justify-center py-24 bg-[var(--color-surface-container)] rounded-3xl border border-dashed border-[var(--color-outline-variant)]">
+                <span className="material-symbols-outlined text-[var(--color-outline-variant)] text-6xl mb-4">
                   {isSearchMode ? 'manage_search' : 'search_off'}
                 </span>
                 {isSearchMode ? (
                   <>
-                    <p className="text-neutral-500 font-medium text-lg">Sin resultados para &ldquo;{searchQuery}&rdquo;</p>
-                    <p className="text-neutral-400 text-sm mt-1">Intenta con otro término de búsqueda</p>
+                    <p className="text-[var(--color-on-surface-variant)] font-medium text-lg">Sin resultados para &ldquo;{searchQuery}&rdquo;</p>
+                    <p className="text-[var(--color-outline)] text-sm mt-1">Intenta con otro término de búsqueda</p>
                     <button
                       onClick={() => router.push('/products')}
                       className="mt-4 text-[--color-primary] font-medium hover:underline text-sm"
@@ -194,8 +194,8 @@ function ProductsContent() {
                   </>
                 ) : (
                   <>
-                    <p className="text-neutral-500 font-medium text-lg">No encontramos productos</p>
-                    <p className="text-neutral-400 text-sm mt-1">Prueba quitando algunos filtros</p>
+                    <p className="text-[var(--color-on-surface-variant)] font-medium text-lg">No encontramos productos</p>
+                    <p className="text-[var(--color-outline)] text-sm mt-1">Prueba quitando algunos filtros</p>
                     {currentCategory && (
                       <button onClick={() => updateQuery('category', '')} className="mt-4 text-[--color-primary] font-medium hover:underline text-sm">
                         Ver todos los productos

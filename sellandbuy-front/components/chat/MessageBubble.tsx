@@ -17,15 +17,15 @@ export function MessageBubble({ message, isCurrentUser }: MessageBubbleProps) {
       <div 
         className={`max-w-[75%] px-4 py-3 rounded-2xl flex flex-col gap-1 shadow-sm ${
           isCurrentUser 
-            ? "bg-indigo-600 text-white rounded-br-sm" 
-            : "bg-white text-neutral-800 border border-neutral-100 rounded-bl-sm"
+            ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-br-sm" 
+            : "bg-[var(--color-surface)] text-[var(--color-on-surface)] border border-[var(--color-outline-variant)] rounded-bl-sm"
         }`}
       >
         <p className="text-sm break-words whitespace-pre-wrap">{message.text}</p>
         {timeString && (
           <span 
             className={`text-[10px] self-end mt-1 ${
-              isCurrentUser ? "text-indigo-200" : "text-neutral-400"
+              isCurrentUser ? "text-[var(--color-on-primary)]/70" : "text-[var(--color-on-surface-variant)]"
             }`}
           >
             {timeString}

@@ -49,20 +49,20 @@ export default function ChatPage() {
 
   return (
     <MainLayout showSearch={false} hideBottomNav={true}>
-      <div className="flex flex-col h-[calc(100vh-140px)] max-h-[800px] mt-2 sm:mt-6 bg-white rounded-t-[32px] sm:rounded-[32px] shadow-sm border border-neutral-200/80 overflow-hidden relative">
+      <div className="flex flex-col h-[calc(100vh-140px)] max-h-[800px] mt-2 sm:mt-6 bg-[var(--color-surface)] rounded-t-[32px] sm:rounded-[32px] shadow-sm border border-[var(--color-outline-variant)] overflow-hidden relative">
         
         <div className="flex-1 flex overflow-hidden">
           {/* Conversation List container - hidden on mobile when in chat, side panel on desktop */}
-          <div className="hidden md:flex w-80 lg:w-96 flex-shrink-0 flex-col border-r border-neutral-100 
-bg-white">
+          <div className="hidden md:flex w-80 lg:w-96 flex-shrink-0 flex-col border-r border-[var(--color-outline-variant)] 
+bg-[var(--color-surface)]">
             <ConversationList />
           </div>
 
           {/* Chat Window */}
-          <div className="flex-1 flex flex-col bg-neutral-50 relative min-w-0">
+          <div className="flex-1 flex flex-col bg-[var(--color-surface-container-lowest)] relative min-w-0">
              
              {/* Chat Header */}
-             <div className="bg-white/80 backdrop-blur-md border-b border-neutral-100 p-4 sticky top-0 z-10 flex 
+             <div className="bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-outline-variant)] p-4 sticky top-0 z-10 flex 
 items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
                    <button
@@ -74,37 +74,37 @@ items-center justify-between">
                          router.push("/messages");
                        }
                      }}
-                     className="md:hidden flex items-center gap-1 p-2 -ml-2 mr-1 hover:bg-neutral-100 rounded-xl 
-transition-colors text-indigo-600 font-medium text-sm"
+                     className="md:hidden flex items-center gap-1 p-2 -ml-2 mr-1 hover:bg-[var(--color-surface-container)] rounded-xl 
+transition-colors text-[var(--color-primary)] font-medium text-sm"
                    >
                      <ArrowLeft size={20} />
                      <span className="hidden sm:inline">Volver</span>
                    </button>
                    
                    {currentConv ? (
-                     <div className="flex items-center gap-3 min-w-0 border-l border-neutral-200/60 pl-2 sm:pl-0 
+                     <div className="flex items-center gap-3 min-w-0 border-l border-[var(--color-outline-variant)] pl-2 sm:pl-0 
 sm:border-0">
                         <div className="relative flex-shrink-0">
                            {currentConv.otherUserPhoto ? (
                              <img 
                                src={currentConv.otherUserPhoto} 
                                alt={currentConv.otherUserName || "Usuario"} 
-                               className="w-10 h-10 rounded-full object-cover border border-neutral-100"
+                               className="w-10 h-10 rounded-full object-cover border border-[var(--color-outline-variant)]"
                              />
                            ) : (
-                             <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex 
+                             <div className="w-10 h-10 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-bold flex 
 items-center justify-center">
                                {currentConv.otherUserName?.[0]?.toUpperCase() || '?'}
                              </div>
                            )}
                         </div>
                         <div className="min-w-0 pr-2">
-                           <h2 className="font-bold text-neutral-900 truncate">
+                           <h2 className="font-bold text-[var(--color-on-surface)] truncate">
                              {currentConv.otherUserName || "Usuario eliminado"}
                            </h2>
                            <Link 
                              href={`/products/${currentConv.productId}`}
-                             className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 
+                             className="text-xs text-[var(--color-primary)] hover:underline flex items-center gap-1 
 group truncate"
                            >
                               <Package size={12} className="flex-shrink-0" />
@@ -116,10 +116,10 @@ group-hover:ml-0 transition-all flex-shrink-0" />
                      </div>
                    ) : (
                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-neutral-100 animate-pulse" />
+                        <div className="w-10 h-10 rounded-full bg-[var(--color-surface-container-high)] animate-pulse" />
                         <div>
-                           <div className="w-24 h-4 bg-neutral-100 animate-pulse rounded mb-1" />
-                           <div className="w-32 h-3 bg-neutral-100 animate-pulse rounded" />
+                           <div className="w-24 h-4 bg-[var(--color-surface-container-high)] animate-pulse rounded mb-1" />
+                           <div className="w-32 h-3 bg-[var(--color-surface-container-high)] animate-pulse rounded" />
                         </div>
                      </div>
                    )}
@@ -130,9 +130,9 @@ group-hover:ml-0 transition-all flex-shrink-0" />
              {isAuthorized !== false ? (
                <ChatWindow conversationId={id} />
              ) : (
-               <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white">
-                 <p className="text-neutral-500 mb-4">No tienes acceso a esta conversación.</p>
-                 <Link href="/messages" className="text-indigo-600 font-medium">Volver a mensajes</Link>
+               <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[var(--color-surface)]">
+                 <p className="text-[var(--color-on-surface-variant)] mb-4">No tienes acceso a esta conversación.</p>
+                 <Link href="/messages" className="text-[var(--color-primary)] font-medium">Volver a mensajes</Link>
                </div>
              )}
           </div>

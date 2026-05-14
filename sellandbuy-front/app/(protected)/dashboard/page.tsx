@@ -10,6 +10,7 @@ import { Product, ProductStatus } from "@/types/product";
 import { Loader2, PauseCircle, PlayCircle } from "lucide-react";
 import { useProductActions } from "@/hooks/useProducts";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 // ─── All original business logic is unchanged ────────────────────
 export default function DashboardPage() {
@@ -355,6 +356,20 @@ export default function DashboardPage() {
               })}
             </div>
           )}
+        </section>
+        {/* ── Settings/Preferencias ── */}
+        <section className="bg-[--color-surface-container-lowest] rounded-3xl shadow-sm border border-[--color-outline-variant]/30 overflow-hidden mt-10">
+          <div className="border-b border-[--color-outline-variant]/30 bg-[--color-surface-container-low] px-6 py-4 flex items-center gap-3">
+            <span className="material-symbols-outlined text-[--color-primary]">settings</span>
+            <h2 className="text-lg font-bold text-[--color-on-surface]">Preferencias</h2>
+          </div>
+          <div className="p-6 flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-[--color-on-surface]">Apariencia</h3>
+              <p className="text-sm text-[--color-on-surface-variant]">Alternar entre modo claro y oscuro</p>
+            </div>
+            <ThemeToggle />
+          </div>
         </section>
       </div>
     </MainLayout>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { FloatingMessagesButton } from "@/components/chat/FloatingMessagesButton";
 import "./globals.css";
 
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="h-full antialiased">
+    <html lang="es" className="h-full antialiased" suppressHydrationWarning>
       <head>
         {/* Inter + Material Symbols from Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,11 +30,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          {children}
-          <FloatingMessagesButton />
-        </AuthProvider>
+      <body className="min-h-full flex flex-col transition-colors duration-200">
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <FloatingMessagesButton />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

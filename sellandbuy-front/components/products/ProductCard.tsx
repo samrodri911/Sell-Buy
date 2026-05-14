@@ -67,19 +67,19 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {/* Wishlist button */}
           <button
-            className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-error] transition-colors disabled:opacity-50"
+            className="h-10 w-10 bg-[var(--color-surface)]/90 backdrop-blur-md rounded-full flex items-center justify-center text-[var(--color-on-surface-variant)] hover:text-[var(--color-error)] transition-colors disabled:opacity-50"
             onClick={handleFavorite}
             disabled={isFavLoading}
             aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
           >
-            <span className={`material-symbols-outlined text-[20px] ${isFav ? 'text-[--color-error] font-variation-fill' : ''}`}>
+            <span className={`material-symbols-outlined text-[20px] ${isFav ? 'text-[var(--color-error)] font-variation-fill' : ''}`}>
               favorite
             </span>
           </button>
 
           {/* Share button */}
           <button
-            className="h-10 w-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[--color-on-surface-variant] hover:text-[--color-primary] transition-colors relative"
+            className="h-10 w-10 bg-[var(--color-surface)]/90 backdrop-blur-md rounded-full flex items-center justify-center text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors relative"
             onClick={handleShare}
             aria-label="Compartir"
           >
@@ -87,7 +87,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {isCopied ? "check" : "share"}
             </span>
             {isCopied && (
-              <div className="absolute right-12 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              <div className="absolute right-12 bg-[var(--color-inverse-surface)] text-[var(--color-inverse-on-surface)] text-xs px-2 py-1 rounded whitespace-nowrap">
                 Enlace copiado
               </div>
             )}
@@ -99,8 +99,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <span
             className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase backdrop-blur-md ${
               product.condition === "new"
-                ? "bg-white/90 text-slate-900"
-                : "bg-[--color-secondary-container] text-[--color-on-secondary-container]"
+                ? "bg-[var(--color-surface)]/90 text-[var(--color-on-surface)]"
+                : "bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)]"
             }`}
           >
             {product.condition === "new" ? "Nuevo" : "Usado"}

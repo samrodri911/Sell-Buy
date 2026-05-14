@@ -365,20 +365,20 @@ export default function HomePage() {
 
 
       {/* ─── Right Panel — Auth Form ─────────────────────────────────── */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-24 bg-white relative">
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-24 bg-[var(--color-surface)] relative">
 
         {/* Mobile Header */}
         <div className="md:hidden flex items-center gap-2 mb-10 justify-center">
-          <span className="material-symbols-outlined text-[--color-primary] text-3xl">storefront</span>
-          <span className="text-2xl font-black tracking-tight text-neutral-900">Sell<span className="text-indigo-500">&</span>Buy</span>
+          <span className="material-symbols-outlined text-[var(--color-primary)] text-3xl">storefront</span>
+          <span className="text-2xl font-black tracking-tight text-[var(--color-on-surface)]">Sell<span className="text-[var(--color-primary)]">&</span>Buy</span>
         </div>
 
         <div className="w-full max-w-md mx-auto">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-neutral-900">
+            <h2 className="text-3xl font-bold text-[var(--color-on-surface)]">
               {mode === "login" ? "Bienvenido de nuevo" : "Crea tu cuenta"}
             </h2>
-            <p className="text-neutral-500 mt-2 text-sm">
+            <p className="text-[var(--color-on-surface-variant)] mt-2 text-sm">
               {mode === "login"
                 ? "Ingresa tus datos para acceder a tu cuenta."
                 : "Comienza a comprar y vender en minutos."}
@@ -405,7 +405,7 @@ export default function HomePage() {
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-neutral-200 text-neutral-700 px-4 py-3 rounded-xl font-medium text-sm hover:bg-neutral-50 hover:border-neutral-300 hover:shadow-md active:scale-[0.99] cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-5 group"
+            className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-outline-variant)] text-[var(--color-on-surface)] px-4 py-3 rounded-xl font-medium text-sm hover:bg-[var(--color-surface-container)] hover:border-[var(--color-outline)] hover:shadow-md active:scale-[0.99] cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-5 group"
           >
             <svg viewBox="0 0 24 24" width="18" height="18" className="flex-shrink-0">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -413,20 +413,20 @@ export default function HomePage() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
-            <span className="group-hover:text-neutral-900 transition-colors">Continuar con Google</span>
+            <span className="group-hover:text-[var(--color-on-surface)] transition-colors">Continuar con Google</span>
           </button>
 
           <div className="relative flex items-center gap-4 mb-5">
-            <div className="flex-1 h-px bg-neutral-150"></div>
-            <span className="text-neutral-400 text-xs font-medium uppercase tracking-wider">o con email</span>
-            <div className="flex-1 h-px bg-neutral-150"></div>
+            <div className="flex-1 h-px bg-[var(--color-outline-variant)]"></div>
+            <span className="text-[var(--color-on-surface-variant)] text-xs font-medium uppercase tracking-wider">o con email</span>
+            <div className="flex-1 h-px bg-[var(--color-outline-variant)]"></div>
           </div>
 
           <form onSubmit={handleEmailAuth} className="flex flex-col gap-4">
             {mode === "signup" && (
               <>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-neutral-700">Nombre completo</label>
+                  <label className="text-sm font-medium text-[var(--color-on-surface)]">Nombre completo</label>
                   <input
                     type="text"
                     placeholder="Tu nombre"
@@ -435,25 +435,25 @@ export default function HomePage() {
                     required
                     minLength={2}
                     disabled={isLoading}
-                    className="w-full bg-neutral-50 border border-neutral-200 px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 hover:border-neutral-300 transition-all duration-200 placeholder:text-neutral-400"
+                    className="w-full bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)] px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-outline)] transition-all duration-200 placeholder:text-[var(--color-outline)] text-[var(--color-on-surface)]"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-neutral-700">Fecha de nacimiento <span className="text-neutral-400 font-normal">(debes ser mayor de 18 años)</span></label>
+                  <label className="text-sm font-medium text-[var(--color-on-surface)]">Fecha de nacimiento <span className="text-[var(--color-outline)] font-normal">(debes ser mayor de 18 años)</span></label>
                   <input
                     type="date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
                     required
                     disabled={isLoading}
-                    className="w-full bg-neutral-50 border border-neutral-200 px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 hover:border-neutral-300 transition-all duration-200"
+                    className="w-full bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)] px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-outline)] transition-all duration-200 text-[var(--color-on-surface)]"
                   />
                 </div>
               </>
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-neutral-700">Correo electrónico</label>
+              <label className="text-sm font-medium text-[var(--color-on-surface)]">Correo electrónico</label>
               <input
                 type="email"
                 placeholder="correo@ejemplo.com"
@@ -462,12 +462,12 @@ export default function HomePage() {
                 required
                 disabled={isLoading}
                 autoComplete="email"
-                className="w-full bg-neutral-50 border border-neutral-200 px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 hover:border-neutral-300 transition-all duration-200 placeholder:text-neutral-400"
+                className="w-full bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)] px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-outline)] transition-all duration-200 placeholder:text-[var(--color-outline)] text-[var(--color-on-surface)]"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-neutral-700">Contraseña</label>
+              <label className="text-sm font-medium text-[var(--color-on-surface)]">Contraseña</label>
               <input
                 type="password"
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Tu contraseña"}
@@ -477,14 +477,14 @@ export default function HomePage() {
                 minLength={6}
                 disabled={isLoading}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                className="w-full bg-neutral-50 border border-neutral-200 px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 hover:border-neutral-300 transition-all duration-200 placeholder:text-neutral-400"
+                className="w-full bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)] px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-outline)] transition-all duration-200 placeholder:text-[var(--color-outline)] text-[var(--color-on-surface)]"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-1 w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-indigo-700 active:scale-[0.99] cursor-pointer transition-all duration-200 shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="mt-1 w-full bg-[var(--color-primary)] text-white font-bold py-3.5 rounded-xl text-sm hover:bg-[var(--color-primary-container)] active:scale-[0.99] cursor-pointer transition-all duration-200 shadow-lg shadow-[var(--color-primary)]/25 hover:shadow-[var(--color-primary)]/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading
                 ? <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
@@ -494,19 +494,19 @@ export default function HomePage() {
             </button>
           </form>
 
-          <div className="mt-7 text-center text-neutral-500 text-sm">
+          <div className="mt-7 text-center text-[var(--color-on-surface-variant)] text-sm">
             {mode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
             <button
               onClick={switchMode}
               type="button"
-              className="text-indigo-600 font-bold hover:text-indigo-700 hover:underline cursor-pointer transition-colors"
+              className="text-[var(--color-primary)] font-bold hover:text-[var(--color-primary-container)] hover:underline cursor-pointer transition-colors"
             >
               {mode === "login" ? "Regístrate gratis" : "Inicia Sesión"}
             </button>
           </div>
 
           <div className="mt-8 text-center">
-            <Link href="/products" className="text-sm text-neutral-400 hover:text-neutral-600 font-medium transition-colors">
+            <Link href="/products" className="text-sm text-[var(--color-outline)] hover:text-[var(--color-on-surface)] font-medium transition-colors">
               Explorar como invitado &rarr;
             </Link>
           </div>

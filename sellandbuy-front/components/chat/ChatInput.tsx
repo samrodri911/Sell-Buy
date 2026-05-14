@@ -50,7 +50,7 @@ export function ChatInput({ onSendMessage, loading = false }: ChatInputProps) {
   return (
     <form 
       onSubmit={handleSubmit}
-      className="p-4 bg-white border-t border-neutral-100 flex items-end gap-2 isolate"
+      className="p-4 bg-[var(--color-surface)] border-t border-[var(--color-outline-variant)] flex items-end gap-2 isolate"
     >
       <textarea
         ref={inputRef}
@@ -58,7 +58,7 @@ export function ChatInput({ onSendMessage, loading = false }: ChatInputProps) {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Escribe un mensaje..."
-        className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-y-auto min-h-[44px] max-h-[120px]"
+        className="flex-1 bg-[var(--color-surface-container)] border border-[var(--color-outline-variant)] rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] resize-none overflow-y-auto min-h-[44px] max-h-[120px] text-[var(--color-on-surface)] placeholder-[var(--color-outline)]"
         rows={1}
         disabled={isSending || loading}
       />
@@ -67,8 +67,8 @@ export function ChatInput({ onSendMessage, loading = false }: ChatInputProps) {
         disabled={isButtonDisabled}
         className={`p-3 rounded-full flex flex-shrink-0 items-center justify-center transition-all ${
           isButtonDisabled 
-            ? "bg-neutral-100 text-neutral-400 cursor-not-allowed" 
-            : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow-md hover:shadow-indigo-600/20"
+            ? "bg-[var(--color-surface-container-high)] text-[var(--color-outline)] cursor-not-allowed" 
+            : "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-container)] shadow-sm hover:shadow-md hover:shadow-[var(--color-primary)]/20"
         }`}
       >
         <SendHorizontal size={20} className={isSending ? "animate-pulse" : ""} />

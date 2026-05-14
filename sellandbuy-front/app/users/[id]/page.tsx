@@ -72,12 +72,12 @@ function ProfileProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
         {/* Price badge */}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-[--color-primary] shadow-sm">
+        <div className="absolute top-4 right-4 bg-[var(--color-surface)]/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-[var(--color-primary)] shadow-sm">
           {price}
         </div>
         {/* Condition badge */}
         <div className="absolute bottom-4 left-4">
-          <span className="bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider text-slate-900 uppercase">
+          <span className="bg-[var(--color-surface)]/90 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider text-[var(--color-on-surface)] uppercase">
             {product.condition === "new" ? "Nuevo" : "Usado"}
           </span>
         </div>
